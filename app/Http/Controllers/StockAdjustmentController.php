@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ReferenceNumberGenerator;
 use App\Models\Item;
 use App\Models\StockAdjustment;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,11 +25,14 @@ class StockAdjustmentController extends Controller
         $search = $request->input('search');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+        $userId = $request->input('user_id');
 
-        $query = StockAdjustment::with(['item.category', 'item.unit', 'user']);
+        $query = StockAdjustment::with(['item.category', 'item.unit', 'user.roles']);
 
         if (! $request->user()->hasAnyRole(['admin', 'pemilik'])) {
             $query->where('user_id', $request->user()->id);
+        } elseif ($userId) {
+            $query->where('user_id', $userId);
         }
 
         if ($search) {
@@ -49,16 +53,19 @@ class StockAdjustmentController extends Controller
         $adjustments = $query->latest('date')->latest('id')->paginate(10)->withQueryString();
 
         $items = Item::with(['category', 'unit'])->orderBy('name')->get();
+        $users = User::with('roles')->orderBy('name')->get();
         $autoRef = ReferenceNumberGenerator::generateAdjustmentRef();
 
         return Inertia::render('StockAdjustments/Index', [
             'adjustments' => $adjustments,
             'items' => $items,
+            'users' => $users,
             'autoRef' => $autoRef,
             'filters' => [
                 'search' => $search,
                 'start_date' => $startDate,
                 'end_date' => $endDate,
+                'user_id' => $userId,
             ],
         ]);
     }

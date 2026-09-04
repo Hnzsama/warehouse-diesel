@@ -6,6 +6,7 @@ use App\Helpers\ImageHelper;
 use App\Helpers\ReferenceNumberGenerator;
 use App\Models\IncomingItem;
 use App\Models\Item;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,11 +28,14 @@ class IncomingItemController extends Controller
             $search = $request->input('search');
             $startDate = $request->input('start_date');
             $endDate = $request->input('end_date');
+            $userId = $request->input('user_id');
 
-            $query = IncomingItem::with(['item.category', 'item.unit', 'user', 'editLogs.user']);
+            $query = IncomingItem::with(['item.category', 'item.unit', 'user.roles', 'editLogs.user.roles']);
 
             if (! $request->user()->hasAnyRole(['admin', 'pemilik'])) {
                 $query->where('user_id', $request->user()->id);
+            } elseif ($userId) {
+                $query->where('user_id', $userId);
             }
 
             if ($search) {
@@ -52,14 +56,17 @@ class IncomingItemController extends Controller
             $incomingItems = $query->latest('date')->latest('id')->paginate(10)->withQueryString();
 
             $items = Item::with(['category', 'unit'])->orderBy('name')->get();
+            $users = User::with('roles')->orderBy('name')->get();
 
             return Inertia::render('IncomingItems/Index', [
                 'incomingItems' => $incomingItems,
                 'items' => $items,
+                'users' => $users,
                 'filters' => [
                     'search' => $search,
                     'start_date' => $startDate,
                     'end_date' => $endDate,
+                    'user_id' => $userId,
                 ],
             ]);
         } catch (Throwable $e) {

@@ -18,6 +18,16 @@ import { Label } from '@/components/ui/label';
 import type { SharedData } from '@/types/auth';
 import type { BreadcrumbItem } from '@/types';
 
+type UserOption = {
+    id: number;
+    name: string;
+    roles?: { name: string }[];
+    is_admin?: boolean;
+    is_pemilik?: boolean;
+    is_staf?: boolean;
+    is_qc?: boolean;
+};
+
 type Item = {
     id: number;
     item_code: string;
@@ -31,7 +41,7 @@ type EditLog = {
     user_id: number;
     notes: string | null;
     created_at: string;
-    user?: { name: string };
+    user?: UserOption;
 };
 
 type IncomingItem = {
@@ -45,7 +55,7 @@ type IncomingItem = {
     invoice_image_url: string | null;
     item_id?: number;
     item?: Item;
-    user?: { name: string };
+    user?: UserOption;
     edit_logs?: EditLog[];
 };
 
@@ -60,10 +70,12 @@ type PaginatedData<T> = {
 type IncomingItemsIndexProps = {
     incomingItems: PaginatedData<IncomingItem>;
     items: Item[];
+    users?: UserOption[];
     filters: {
         search?: string;
         start_date?: string;
         end_date?: string;
+        user_id?: string;
     };
 };
 
@@ -71,6 +83,67 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Barang Masuk', href: '/incoming-items' },
 ];
+
+const formatShortName = (name?: string | null) => {
+    if (!name) return 'Admin';
+    const words = name.trim().split(/\s+/);
+    if (words.length <= 2) return name;
+    return words.slice(0, 2).join(' ');
+};
+
+const getRoleBadge = (user?: any) => {
+    if (!user) return null;
+    const roles = user.roles || [];
+    const isAdmin = user.is_admin || roles.some((r: any) => (typeof r === 'string' ? r === 'admin' : r?.name === 'admin'));
+    const isOwner = user.is_pemilik || roles.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'));
+    const isStaf = user.is_staf || roles.some((r: any) => (typeof r === 'string' ? r === 'staf_operasional' : r?.name === 'staf_operasional'));
+    const isQc = user.is_qc || roles.some((r: any) => (typeof r === 'string' ? r === 'admin_qc' : r?.name === 'admin_qc'));
+
+    if (isAdmin) {
+        return (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-bold bg-red-500/10 text-red-600 border-red-500/20 dark:text-red-400 whitespace-nowrap shrink-0">
+                Admin
+            </Badge>
+        );
+    }
+    if (isOwner) {
+        return (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-bold bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400 whitespace-nowrap shrink-0">
+                Pemilik
+            </Badge>
+        );
+    }
+    if (isStaf) {
+        return (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400 whitespace-nowrap shrink-0">
+                Staf Op
+            </Badge>
+        );
+    }
+    if (isQc) {
+        return (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-bold bg-purple-500/10 text-purple-600 border-purple-500/20 dark:text-purple-400 whitespace-nowrap shrink-0">
+                Admin QC
+            </Badge>
+        );
+    }
+    return null;
+};
+
+const getUserRoleLabel = (user?: any) => {
+    if (!user) return '';
+    const roles = user.roles || [];
+    const isAdmin = user.is_admin || roles.some((r: any) => (typeof r === 'string' ? r === 'admin' : r?.name === 'admin'));
+    const isOwner = user.is_pemilik || roles.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'));
+    const isStaf = user.is_staf || roles.some((r: any) => (typeof r === 'string' ? r === 'staf_operasional' : r?.name === 'staf_operasional'));
+    const isQc = user.is_qc || roles.some((r: any) => (typeof r === 'string' ? r === 'admin_qc' : r?.name === 'admin_qc'));
+
+    if (isAdmin) return 'Admin Utama';
+    if (isOwner) return 'Pemilik';
+    if (isStaf) return 'Staf Operasional';
+    if (isQc) return 'Admin QC';
+    return '';
+};
 
 const formatDateWithTime = (dateStr: string | null) => {
     if (!dateStr) return '-';
@@ -96,7 +169,7 @@ const formatForDateTimeLocal = (dateStr: string | Date | null) => {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
-export default function IncomingItemsIndex({ incomingItems, items, filters }: IncomingItemsIndexProps) {
+export default function IncomingItemsIndex({ incomingItems, items, users = [], filters }: IncomingItemsIndexProps) {
     const { flash } = usePage<SharedData>().props;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<IncomingItem | null>(null);
@@ -105,6 +178,7 @@ export default function IncomingItemsIndex({ incomingItems, items, filters }: In
     const [search, setSearch] = useState(filters.search || '');
     const [startDate, setStartDate] = useState(filters.start_date || '');
     const [endDate, setEndDate] = useState(filters.end_date || '');
+    const [userId, setUserId] = useState(filters.user_id || '');
 
     const { data, setData, post, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         reference_no: `IN-${Date.now().toString().slice(-6)}`,
@@ -121,7 +195,7 @@ export default function IncomingItemsIndex({ incomingItems, items, filters }: In
         e.preventDefault();
         router.get(
             '/incoming-items',
-            { search, start_date: startDate, end_date: endDate },
+            { search, start_date: startDate, end_date: endDate, user_id: userId },
             { preserveState: true }
         );
     };
@@ -218,7 +292,7 @@ export default function IncomingItemsIndex({ incomingItems, items, filters }: In
                 {/* Filter Bar */}
                 <Card>
                     <CardContent className="p-3 sm:p-4">
-                        <form onSubmit={handleSearch} className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                        <form onSubmit={handleSearch} className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
                             <div className="relative w-full">
                                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -241,6 +315,24 @@ export default function IncomingItemsIndex({ incomingItems, items, filters }: In
                                 onChange={setEndDate}
                                 placeholder="Tgl Selesai..."
                             />
+
+                            <div className="w-full">
+                                <select
+                                    value={userId}
+                                    onChange={(e) => setUserId(e.target.value)}
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+                                >
+                                    <option value="">-- Semua Operator --</option>
+                                    {users.map((u) => {
+                                        const roleLabel = getUserRoleLabel(u);
+                                        return (
+                                            <option key={u.id} value={u.id}>
+                                                {formatShortName(u.name)} {roleLabel ? `(${roleLabel})` : ''}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            </div>
 
                             <Button type="submit" variant="secondary" className="gap-1.5 cursor-pointer justify-center">
                                 <Filter className="h-4 w-4" />
@@ -309,16 +401,20 @@ export default function IncomingItemsIndex({ incomingItems, items, filters }: In
                                                             <span className="text-xs text-muted-foreground">-</span>
                                                         )}
                                                     </td>
-                                                    <td className="px-4 py-3.5 text-xs text-muted-foreground">
-                                                        <div className="flex flex-col">
-                                                            <span className="font-medium text-foreground">{tx.user?.name || 'Admin'}</span>
-                                                            {lastEditLog && (
-                                                                <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5" title={`Diedit terakhir oleh ${lastEditLog.user?.name} pada ${formatDateWithTime(lastEditLog.created_at)}`}>
-                                                                    <History className="h-3 w-3 text-amber-500 shrink-0" />
-                                                                    <span>Edit: {lastEditLog.user?.name}</span>
-                                                                </span>
-                                                            )}
+                                                    <td className="px-4 py-3.5 text-xs text-muted-foreground whitespace-nowrap">
+                                                        <div className="flex items-center gap-1.5 flex-nowrap" title={tx.user?.name || 'Admin'}>
+                                                            <span className="font-semibold text-foreground whitespace-nowrap truncate max-w-[140px]">
+                                                                {formatShortName(tx.user?.name)}
+                                                            </span>
+                                                            {getRoleBadge(tx.user)}
                                                         </div>
+                                                        {lastEditLog && (
+                                                            <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5 whitespace-nowrap" title={`Diedit terakhir oleh ${lastEditLog.user?.name} pada ${formatDateWithTime(lastEditLog.created_at)}`}>
+                                                                <History className="h-3 w-3 text-amber-500 shrink-0" />
+                                                                <span className="truncate max-w-[120px]">Edit: {formatShortName(lastEditLog.user?.name)}</span>
+                                                                {getRoleBadge(lastEditLog.user)}
+                                                            </div>
+                                                        )}
                                                     </td>
                                                     <td className="px-4 py-3.5 text-center" onClick={(e) => e.stopPropagation()}>
                                                         <Button
