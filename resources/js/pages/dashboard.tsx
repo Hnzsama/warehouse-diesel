@@ -7,6 +7,7 @@ import {
     Calendar,
     CheckCircle2,
     FileSpreadsheet,
+    FileText,
     Filter,
     PackageMinus,
     PackagePlus,
@@ -182,37 +183,56 @@ export default function Dashboard({
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2.5">
-                                {(isAdmin || isOwner || isStaf) && (
-                                    <Button asChild size="sm" className="gap-2 shadow-sm cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white">
-                                        <Link href="/incoming-items">
-                                            <PackagePlus className="h-4 w-4" />
-                                            <span>Barang Masuk</span>
-                                        </Link>
-                                    </Button>
-                                )}
-                                {(isAdmin || isOwner || isStaf) && (
-                                    <Button asChild size="sm" variant="outline" className="gap-2 shadow-sm cursor-pointer border-amber-500/30 text-amber-600 dark:text-amber-400 hover:border-amber-500">
-                                        <Link href="/outgoing-items">
-                                            <PackageMinus className="h-4 w-4" />
-                                            <span>Barang Keluar</span>
-                                        </Link>
-                                    </Button>
-                                )}
-                                {(isAdmin || isOwner || isQc) && (
-                                    <Button asChild size="sm" variant="outline" className="gap-2 shadow-sm cursor-pointer border-purple-500/30 text-purple-600 dark:text-purple-400 hover:border-purple-500">
-                                        <Link href="/stock-adjustments">
-                                            <SlidersHorizontal className="h-4 w-4" />
-                                            <span>Penyesuaian Stok</span>
-                                        </Link>
-                                    </Button>
-                                )}
-                                {(isAdmin || isOwner) && (
-                                    <Button asChild variant="outline" size="sm" className="gap-2 cursor-pointer border-blue-500/30 hover:border-blue-500 text-blue-600 dark:text-blue-400">
-                                        <a href={excelExportUrl} target="_blank" rel="noopener noreferrer">
-                                            <FileSpreadsheet className="h-4 w-4" />
-                                            <span>Export Excel</span>
-                                        </a>
-                                    </Button>
+                                {isOwner ? (
+                                    <>
+                                        <Button asChild size="sm" className="gap-2 shadow-sm cursor-pointer bg-blue-600 hover:bg-blue-700 text-white">
+                                            <Link href="/reports">
+                                                <FileText className="h-4 w-4" />
+                                                <span>Laporan Persediaan</span>
+                                            </Link>
+                                        </Button>
+                                        <Button asChild variant="outline" size="sm" className="gap-2 cursor-pointer border-emerald-500/30 hover:border-emerald-500 text-emerald-600 dark:text-emerald-400">
+                                            <a href={excelExportUrl} target="_blank" rel="noopener noreferrer">
+                                                <FileSpreadsheet className="h-4 w-4" />
+                                                <span>Export Excel</span>
+                                            </a>
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        {(isAdmin || isStaf) && (
+                                            <Button asChild size="sm" className="gap-2 shadow-sm cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white">
+                                                <Link href="/incoming-items">
+                                                    <PackagePlus className="h-4 w-4" />
+                                                    <span>Barang Masuk</span>
+                                                </Link>
+                                            </Button>
+                                        )}
+                                        {(isAdmin || isStaf) && (
+                                            <Button asChild size="sm" variant="outline" className="gap-2 shadow-sm cursor-pointer border-amber-500/30 text-amber-600 dark:text-amber-400 hover:border-amber-500">
+                                                <Link href="/outgoing-items">
+                                                    <PackageMinus className="h-4 w-4" />
+                                                    <span>Barang Keluar</span>
+                                                </Link>
+                                            </Button>
+                                        )}
+                                        {(isAdmin || isQc) && (
+                                            <Button asChild size="sm" variant="outline" className="gap-2 shadow-sm cursor-pointer border-purple-500/30 text-purple-600 dark:text-purple-400 hover:border-purple-500">
+                                                <Link href="/stock-adjustments">
+                                                    <SlidersHorizontal className="h-4 w-4" />
+                                                    <span>Penyesuaian Stok</span>
+                                                </Link>
+                                            </Button>
+                                        )}
+                                        {isAdmin && (
+                                            <Button asChild variant="outline" size="sm" className="gap-2 cursor-pointer border-blue-500/30 hover:border-blue-500 text-blue-600 dark:text-blue-400">
+                                                <a href={excelExportUrl} target="_blank" rel="noopener noreferrer">
+                                                    <FileSpreadsheet className="h-4 w-4" />
+                                                    <span>Export Excel</span>
+                                                </a>
+                                            </Button>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>

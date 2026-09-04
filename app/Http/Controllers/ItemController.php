@@ -27,8 +27,15 @@ class ItemController extends Controller
             $categoryId = $request->input('category_id');
             $unitId = $request->input('unit_id');
             $stockStatus = $request->input('stock_status');
+            $trashed = $request->input('trashed');
 
             $query = Item::with(['category', 'unit'])->withCount(['incomingItems', 'outgoingItems']);
+
+            if ($trashed === 'only') {
+                $query->onlyTrashed();
+            } elseif ($trashed === 'with') {
+                $query->withTrashed();
+            }
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
@@ -61,6 +68,7 @@ class ItemController extends Controller
                     'category_id' => $categoryId,
                     'unit_id' => $unitId,
                     'stock_status' => $stockStatus,
+                    'trashed' => $trashed,
                 ],
             ]);
         } catch (Throwable $e) {
@@ -136,7 +144,7 @@ class ItemController extends Controller
     }
 
     /**
-     * Remove the specified sparepart item.
+     * Remove the specified sparepart item (Soft Delete).
      */
     public function destroy(Item $item): RedirectResponse
     {
@@ -145,11 +153,28 @@ class ItemController extends Controller
                 $item->delete();
             });
 
-            return redirect()->back()->with('success', 'Data sparepart berhasil dihapus.');
+            return redirect()->back()->with('success', 'Data sparepart berhasil dihapus (Soft Delete).');
         } catch (Throwable $e) {
             Log::error('Error deleting item: '.$e->getMessage());
 
             return redirect()->back()->with('error', 'Gagal menghapus data sparepart: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Restore the specified soft-deleted sparepart item.
+     */
+    public function restore(int $id): RedirectResponse
+    {
+        try {
+            $item = Item::onlyTrashed()->findOrFail($id);
+            $item->restore();
+
+            return redirect()->back()->with('success', "Data sparepart '{$item->name}' berhasil dipulihkan (restore).");
+        } catch (Throwable $e) {
+            Log::error('Error restoring item: '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal memulihkan data sparepart: '.$e->getMessage());
         }
     }
 }

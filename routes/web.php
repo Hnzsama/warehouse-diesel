@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Master Data Sparepart (Admin Utama, Pemilik, & Admin QC)
     Route::middleware(['role:admin|pemilik|admin_qc'])->group(function () {
+        Route::post('items/{id}/restore', [ItemController::class, 'restore'])->name('items.restore');
         Route::resource('items', ItemController::class)->except(['create', 'edit', 'show']);
     });
 

@@ -8,6 +8,7 @@ import {
     Pencil,
     Plus,
     Printer,
+    RotateCcw,
     Search,
     Trash2,
     X,
@@ -56,6 +57,7 @@ type Item = {
     stock: number;
     min_stock: number;
     rack_location: string | null;
+    deleted_at?: string | null;
     category?: Category;
     unit?: Unit;
     incoming_items_count?: number;
@@ -79,6 +81,7 @@ type ItemsIndexProps = {
         category_id?: string;
         unit_id?: string;
         stock_status?: string;
+        trashed?: string;
     };
 };
 
@@ -97,6 +100,7 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
     const [categoryId, setCategoryId] = useState(filters.category_id || '');
     const [unitId, setUnitId] = useState(filters.unit_id || '');
     const [stockStatus, setStockStatus] = useState(filters.stock_status || '');
+    const [trashed, setTrashed] = useState(filters.trashed || '');
 
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         item_code: '',
@@ -112,7 +116,7 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
         e.preventDefault();
         router.get(
             '/items',
-            { search, category_id: categoryId, unit_id: unitId, stock_status: stockStatus },
+            { search, category_id: categoryId, unit_id: unitId, stock_status: stockStatus, trashed },
             { preserveState: true }
         );
     };
@@ -122,6 +126,7 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
         setCategoryId('');
         setUnitId('');
         setStockStatus('');
+        setTrashed('');
         router.get('/items');
     };
 
@@ -161,8 +166,14 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
     };
 
     const handleDelete = (item: Item) => {
-        if (confirm(`Apakah Anda yakin ingin menghapus sparepart "${item.name}"?`)) {
+        if (confirm(`Apakah Anda yakin ingin menyembunyikan/menghapus (Soft Delete) sparepart "${item.name}"? Data riwayat transaksi tetap tersimpan aman.`)) {
             destroy(`/items/${item.id}`);
+        }
+    };
+
+    const handleRestore = (item: Item) => {
+        if (confirm(`Apakah Anda yakin ingin memulihkan kembali sparepart "${item.name}"?`)) {
+            router.post(`/items/${item.id}/restore`);
         }
     };
 
@@ -292,7 +303,18 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                                 </SelectContent>
                             </Select>
 
-                            <div className="flex items-center gap-2 w-full">
+                            <Select value={trashed} onValueChange={(val) => setTrashed(val === 'active' ? '' : val)}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Filter Data Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">Data Aktif Saja</SelectItem>
+                                    <SelectItem value="only">Data Terhapus (Trash)</SelectItem>
+                                    <SelectItem value="with">Semua (Aktif & Terhapus)</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <div className="flex items-center gap-2 w-full lg:col-span-1">
                                 <Button type="submit" className="flex-1 gap-1.5 cursor-pointer justify-center" variant="secondary">
                                     <Filter className="h-4 w-4" />
                                     <span>Filter</span>
@@ -331,15 +353,23 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                                     ) : (
                                         items.data.map((item) => {
                                             const isLow = item.stock <= item.min_stock;
+                                            const isTrashed = Boolean(item.deleted_at);
                                             return (
                                                 <TableRow
                                                     key={item.id}
                                                     onClick={() => setViewingItem(item)}
-                                                    className="cursor-pointer hover:bg-muted/70 transition-colors group"
+                                                    className={`cursor-pointer hover:bg-muted/70 transition-colors group ${isTrashed ? 'bg-red-500/5 opacity-75' : ''}`}
                                                     title="Klik untuk melihat rincian suku cadang"
                                                 >
                                                     <TableCell className="font-mono font-bold group-hover:text-primary transition-colors">{item.item_code}</TableCell>
-                                                    <TableCell className="font-medium">{item.name}</TableCell>
+                                                    <TableCell className="font-medium">
+                                                        <span>{item.name}</span>
+                                                        {isTrashed && (
+                                                            <Badge variant="outline" className="ml-2 border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 text-[10px] px-1.5 py-0">
+                                                                Soft-Deleted
+                                                            </Badge>
+                                                        )}
+                                                    </TableCell>
                                                     <TableCell className="text-muted-foreground">{item.category?.name || '-'}</TableCell>
                                                     <TableCell className="text-center">
                                                         {isLow ? (
@@ -367,24 +397,38 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                                                             >
                                                                 <Eye className="h-4 w-4" />
                                                             </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => openEditModal(item)}
-                                                                className="h-8 w-8 text-amber-500 hover:bg-amber-500/15 cursor-pointer"
-                                                                title="Edit Data Sparepart"
-                                                            >
-                                                                <Pencil className="h-4 w-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => handleDelete(item)}
-                                                                className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                                title="Hapus Sparepart"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
+                                                            {!isTrashed && (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => openEditModal(item)}
+                                                                    className="h-8 w-8 text-amber-500 hover:bg-amber-500/15 cursor-pointer"
+                                                                    title="Edit Data Sparepart"
+                                                                >
+                                                                    <Pencil className="h-4 w-4" />
+                                                                </Button>
+                                                            )}
+                                                            {isTrashed ? (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => handleRestore(item)}
+                                                                    className="h-8 w-8 text-emerald-600 hover:bg-emerald-500/15 cursor-pointer"
+                                                                    title="Pulihkan (Restore) Sparepart"
+                                                                >
+                                                                    <RotateCcw className="h-4 w-4" />
+                                                                </Button>
+                                                            ) : (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => handleDelete(item)}
+                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                                    title="Hapus (Soft Delete) Sparepart"
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            )}
                                                         </div>
                                                     </TableCell>
                                                 </TableRow>

@@ -49,7 +49,7 @@ class OutgoingItem extends Model
      */
     public function item(): BelongsTo
     {
-        return $this->belongsTo(Item::class);
+        return $this->belongsTo(Item::class)->withTrashed();
     }
 
     /**
