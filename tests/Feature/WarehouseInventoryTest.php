@@ -10,6 +10,7 @@ use App\Models\User;
 test('authenticated user can view dashboard stats', function () {
     $this->withoutVite();
     $user = User::factory()->create();
+    $user->assignRole('admin');
 
     $response = $this->actingAs($user)->get('/dashboard');
 
@@ -19,6 +20,7 @@ test('authenticated user can view dashboard stats', function () {
 test('admin can create new sparepart item', function () {
     $this->withoutVite();
     $user = User::factory()->create();
+    $user->assignRole('admin');
     $category = Category::create(['name' => 'Mesin', 'slug' => 'mesin']);
     $unit = Unit::create(['name' => 'Pcs', 'short_name' => 'pcs']);
 
@@ -43,6 +45,7 @@ test('admin can create new sparepart item', function () {
 test('incoming item transaction automatically increases item stock', function () {
     $this->withoutVite();
     $user = User::factory()->create();
+    $user->assignRole('admin');
     $category = Category::create(['name' => 'Filter', 'slug' => 'filter']);
     $unit = Unit::create(['name' => 'Pcs', 'short_name' => 'pcs']);
     $item = Item::create([
@@ -74,6 +77,7 @@ test('incoming item transaction automatically increases item stock', function ()
 test('outgoing item transaction automatically decreases item stock', function () {
     $this->withoutVite();
     $user = User::factory()->create();
+    $user->assignRole('admin');
     $category = Category::create(['name' => 'Filter', 'slug' => 'filter']);
     $unit = Unit::create(['name' => 'Pcs', 'short_name' => 'pcs']);
     $item = Item::create([
@@ -105,6 +109,7 @@ test('outgoing item transaction automatically decreases item stock', function ()
 test('outgoing item transaction prevents negative stock when quantity exceeds available stock', function () {
     $this->withoutVite();
     $user = User::factory()->create();
+    $user->assignRole('admin');
     $category = Category::create(['name' => 'Filter', 'slug' => 'filter']);
     $unit = Unit::create(['name' => 'Pcs', 'short_name' => 'pcs']);
     $item = Item::create([
@@ -130,6 +135,7 @@ test('outgoing item transaction prevents negative stock when quantity exceeds av
 test('authenticated user can access report page', function () {
     $this->withoutVite();
     $user = User::factory()->create();
+    $user->assignRole('admin');
 
     $response = $this->actingAs($user)->get('/reports?report_type=stock');
 
@@ -139,6 +145,7 @@ test('authenticated user can access report page', function () {
 test('admin can edit incoming item transaction and reconcile stock', function () {
     $this->withoutVite();
     $user = User::factory()->create();
+    $user->assignRole('admin');
     $category = Category::create(['name' => 'Filter', 'slug' => 'filter-edit']);
     $unit = Unit::create(['name' => 'Pcs', 'short_name' => 'pcs']);
     $item = Item::create([
@@ -173,6 +180,7 @@ test('admin can edit incoming item transaction and reconcile stock', function ()
 test('admin can delete incoming item transaction and decrease stock', function () {
     $this->withoutVite();
     $user = User::factory()->create();
+    $user->assignRole('admin');
     $category = Category::create(['name' => 'Filter', 'slug' => 'filter-del']);
     $unit = Unit::create(['name' => 'Pcs', 'short_name' => 'pcs']);
     $item = Item::create([
@@ -201,6 +209,7 @@ test('admin can delete incoming item transaction and decrease stock', function (
 test('admin can delete outgoing item transaction and restore stock', function () {
     $this->withoutVite();
     $user = User::factory()->create();
+    $user->assignRole('admin');
     $category = Category::create(['name' => 'Filter', 'slug' => 'filter-out-del']);
     $unit = Unit::create(['name' => 'Pcs', 'short_name' => 'pcs']);
     $item = Item::create([

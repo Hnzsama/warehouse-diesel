@@ -2,10 +2,7 @@
 
 use App\Helpers\ReferenceNumberGenerator;
 use App\Models\Category;
-use App\Models\IncomingItem;
 use App\Models\Item;
-use App\Models\OutgoingItem;
-use App\Models\StockAdjustment;
 use App\Models\Unit;
 use App\Models\User;
 
@@ -21,6 +18,7 @@ test('reference number generator creates unique sequential numbers', function ()
 
 test('authenticated user can record stock adjustment and item stock updates accordingly', function () {
     $user = User::factory()->create();
+    $user->assignRole('admin_qc');
     $category = Category::create(['name' => 'Mesin', 'slug' => 'mesin']);
     $unit = Unit::create(['name' => 'Pcs', 'short_name' => 'pcs']);
     $item = Item::create([

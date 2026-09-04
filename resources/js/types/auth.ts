@@ -9,6 +9,9 @@ export type User = {
     roles?: string[];
     is_admin?: boolean;
     is_pemilik?: boolean;
+    is_staf?: boolean;
+    is_qc?: boolean;
+    role_label?: string;
     [key: string]: unknown;
 };
 

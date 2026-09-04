@@ -45,6 +45,15 @@ class HandleInertiaRequests extends Middleware
                     'roles' => $user->getRoleNames(),
                     'is_admin' => $user->hasRole('admin'),
                     'is_pemilik' => $user->hasRole('pemilik'),
+                    'is_staf' => $user->hasRole('staf_operasional'),
+                    'is_qc' => $user->hasRole('admin_qc'),
+                    'role_label' => match (true) {
+                        $user->hasRole('pemilik') => 'Pemilik (Owner)',
+                        $user->hasRole('admin') => 'Admin Utama',
+                        $user->hasRole('staf_operasional') => 'Staf Operasional',
+                        $user->hasRole('admin_qc') => 'Admin QC',
+                        default => 'Pengguna',
+                    },
                 ]) : null,
             ],
             'flash' => [

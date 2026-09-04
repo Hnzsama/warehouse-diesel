@@ -16,26 +16,38 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Dashboard (Admin & Pemilik)
+    // Dashboard (Semua Peran / Role)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Master Data Sparepart & Reference (Admin & Pemilik View, Admin CRUD)
-    Route::resource('items', ItemController::class)->except(['create', 'edit', 'show']);
-    Route::resource('categories', CategoryController::class)->except(['create', 'edit', 'show']);
-    Route::resource('units', UnitController::class)->except(['create', 'edit', 'show']);
+    // Transaksi Barang Masuk & Keluar (Admin, Pemilik, & Staf Operasional)
+    Route::middleware(['role:admin|pemilik|staf_operasional'])->group(function () {
+        Route::resource('incoming-items', IncomingItemController::class)->except(['create', 'edit', 'show']);
+        Route::resource('outgoing-items', OutgoingItemController::class)->except(['create', 'edit', 'show']);
+    });
 
-    // User / Admin Management (Admin Only)
-    Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
+    // Penyesuaian Stok & Cek Barang Rusak (Admin, Pemilik, & Admin QC)
+    Route::middleware(['role:admin|pemilik|admin_qc'])->group(function () {
+        Route::resource('stock-adjustments', StockAdjustmentController::class)->only(['index', 'store', 'destroy']);
+    });
 
-    // Inventory Transactions (Admin)
-    Route::resource('incoming-items', IncomingItemController::class)->except(['create', 'edit', 'show']);
-    Route::resource('outgoing-items', OutgoingItemController::class)->except(['create', 'edit', 'show']);
-    Route::resource('stock-adjustments', StockAdjustmentController::class)->only(['index', 'store', 'destroy']);
+    // Master Data Sparepart (Admin Utama, Pemilik, & Admin QC)
+    Route::middleware(['role:admin|pemilik|admin_qc'])->group(function () {
+        Route::resource('items', ItemController::class)->except(['create', 'edit', 'show']);
+    });
 
-    // Reports (Admin & Pemilik)
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
-    Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
+    // Kategori, Satuan, & Pengguna (Admin Utama & Pemilik)
+    Route::middleware(['role:admin|pemilik'])->group(function () {
+        Route::resource('categories', CategoryController::class)->except(['create', 'edit', 'show']);
+        Route::resource('units', UnitController::class)->except(['create', 'edit', 'show']);
+        Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
+    });
+
+    // Laporan Persediaan (Admin Utama & Pemilik)
+    Route::middleware(['role:admin|pemilik'])->group(function () {
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
+        Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
+    });
 });
 
 require __DIR__.'/settings.php';
