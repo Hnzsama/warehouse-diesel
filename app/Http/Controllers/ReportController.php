@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\IncomingItem;
 use App\Models\Item;
 use App\Models\OutgoingItem;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use PhpOffice\PhpSpreadsheet\Chart\Chart;
@@ -84,9 +87,9 @@ class ReportController extends Controller
     }
 
     /**
-     * Render print-ready layout for inventory reports.
+     * Generate & Download high quality PDF report.
      */
-    public function print(Request $request): Response
+    public function exportPdf(Request $request): HttpResponse
     {
         try {
             $reportType = $request->input('report_type', 'stock');
@@ -109,44 +112,61 @@ class ReportController extends Controller
             }
 
             $reportData = [];
+            $reportTitle = 'Laporan Stok Persediaan';
 
             if ($reportType === 'stock') {
+                $reportTitle = 'Laporan Stok Persediaan Sparepart';
                 $reportData = Item::with(['category', 'unit'])
                     ->orderBy('name')
                     ->get();
             } elseif ($reportType === 'incoming') {
+                $reportTitle = 'Laporan Transaksi Barang Masuk';
                 $reportData = IncomingItem::with(['item.category', 'item.unit', 'user'])
-                    ->whereBetween('date', [$startDate, $endDate])
+                    ->whereBetween('date', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
                     ->latest('date')
                     ->get();
             } elseif ($reportType === 'outgoing') {
+                $reportTitle = 'Laporan Transaksi Barang Keluar';
                 $reportData = OutgoingItem::with(['item.category', 'item.unit', 'user'])
-                    ->whereBetween('date', [$startDate, $endDate])
+                    ->whereBetween('date', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
                     ->latest('date')
                     ->get();
             }
 
-            return Inertia::render('Reports/Print', [
+            $periodLabel = match ($period) {
+                'today' => 'Harian (Hari Ini)',
+                'weekly' => 'Mingguan (7 Hari Terakhir)',
+                'monthly' => 'Bulanan (Bulan Ini)',
+                default => 'Kustom Periode',
+            };
+
+            $pdf = Pdf::loadView('reports.pdf', [
                 'reportType' => $reportType,
-                'period' => $period,
-                'startDate' => $startDate,
-                'endDate' => $endDate,
+                'reportTitle' => $reportTitle,
+                'periodLabel' => $periodLabel,
+                'startDate' => Carbon::parse($startDate)->format('d/m/Y'),
+                'endDate' => Carbon::parse($endDate)->format('d/m/Y'),
                 'reportData' => $reportData,
                 'printedAt' => now()->translatedFormat('d F Y H:i'),
-                'user' => $request->user(),
-            ]);
+                'userName' => $request->user()?->name ?? 'Admin',
+            ])->setPaper('a4', 'portrait');
+
+            $filename = Str::slug($reportTitle).'_'.now()->format('Ymd_His').'.pdf';
+
+            return $pdf->download($filename);
         } catch (Throwable $e) {
-            Log::error('Error generating report print layout: '.$e->getMessage());
+            Log::error('Error generating PDF report: '.$e->getMessage());
             throw $e;
         }
     }
 
     /**
-     * Export professional Excel report with embedded native Excel Chart.
+     * Export professional, neatly styled Excel report tailored to selected report type.
      */
     public function exportExcel(Request $request): StreamedResponse
     {
         try {
+            $reportType = $request->input('report_type', 'stock');
             $period = $request->input('period', 'monthly');
             $startDateInput = $request->input('start_date');
             $endDateInput = $request->input('end_date');
@@ -284,43 +304,129 @@ class ReportController extends Controller
                 $sheet1->getColumnDimension($col)->setAutoSize(true);
             }
 
-            // --- SHEET 2: DETAIL DATA SPAREPART & STOK ---
+            // --- SHEET 2: LAPORAN SESUAI REPORT TYPE ---
             $sheet2 = $spreadsheet->createSheet();
-            $sheet2->setTitle('Data Sparepart');
             $sheet2->setShowGridLines(true);
 
-            $sheet2->mergeCells('A1:G1');
-            $sheet2->setCellValue('A1', 'MASTER SPAREPART & STATUS STOK GUDANG');
-            $sheet2->getStyle('A1')->getFont()->setBold(true)->setSize(12)->setColor(new Color(Color::COLOR_WHITE));
-            $sheet2->getStyle('A1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('0F172A');
-            $sheet2->getRowDimension(1)->setRowHeight(25);
+            if ($reportType === 'incoming') {
+                $sheet2->setTitle('Barang Masuk');
+                $sheet2->mergeCells('A1:F1');
+                $sheet2->setCellValue('A1', 'LAPORAN TRANSAKSI BARANG MASUK');
+                $sheet2->getStyle('A1')->getFont()->setBold(true)->setSize(13)->setColor(new Color(Color::COLOR_WHITE));
+                $sheet2->getStyle('A1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('0F172A');
+                $sheet2->getRowDimension(1)->setRowHeight(28);
 
-            $sheet2->fromArray(['Kode Barang', 'Nama Sparepart', 'Kategori', 'Satuan', 'Sisa Stok', 'Stok Min', 'Status Stok'], null, 'A3');
-            $sheet2->getStyle('A3:G3')->getFont()->setBold(true)->setColor(new Color(Color::COLOR_WHITE));
-            $sheet2->getStyle('A3:G3')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('1E293B');
+                $sheet2->setCellValue('A2', 'Periode: '.$startDate.' s/d '.$endDate);
+                $sheet2->getStyle('A2')->getFont()->setItalic(true)->setColor(new Color('64748B'));
 
-            $items = Item::with(['category', 'unit'])->orderBy('name')->get();
-            $r2 = 4;
-            foreach ($items as $item) {
-                $isLow = $item->stock <= $item->min_stock;
-                $sheet2->setCellValue('A'.$r2, $item->item_code);
-                $sheet2->setCellValue('B'.$r2, $item->name);
-                $sheet2->setCellValue('C'.$r2, $item->category?->name ?? '-');
-                $sheet2->setCellValue('D'.$r2, $item->unit?->name ?? '-');
-                $sheet2->setCellValue('E'.$r2, $item->stock);
-                $sheet2->setCellValue('F'.$r2, $item->min_stock);
-                $sheet2->setCellValue('G'.$r2, $isLow ? 'KRITIS' : 'AMAN');
+                $sheet2->fromArray(['No. Referensi / Nota', 'Tanggal & Waktu', 'Kode Barang', 'Nama Sparepart', 'Jumlah Masuk', 'Supplier / Pemasok'], null, 'A4');
+                $sheet2->getStyle('A4:F4')->getFont()->setBold(true)->setColor(new Color(Color::COLOR_WHITE));
+                $sheet2->getStyle('A4:F4')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('1E293B');
 
-                if ($isLow) {
-                    $sheet2->getStyle('G'.$r2)->getFont()->setBold(true)->setColor(new Color('DC2626'));
-                } else {
-                    $sheet2->getStyle('G'.$r2)->getFont()->setColor(new Color('16A34A'));
+                $incomingItems = IncomingItem::with(['item.category', 'item.unit'])
+                    ->whereBetween('date', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
+                    ->latest('date')
+                    ->get();
+
+                $r2 = 5;
+                $totIn = 0;
+                foreach ($incomingItems as $tx) {
+                    $totIn += $tx->quantity;
+                    $sheet2->setCellValue('A'.$r2, $tx->reference_no);
+                    $sheet2->setCellValue('B'.$r2, Carbon::parse($tx->date)->format('d/m/Y H:i'));
+                    $sheet2->setCellValue('C'.$r2, $tx->item?->item_code ?? '-');
+                    $sheet2->setCellValue('D'.$r2, $tx->item?->name ?? '-');
+                    $sheet2->setCellValue('E'.$r2, $tx->quantity);
+                    $sheet2->setCellValue('F'.$r2, $tx->supplier ?? '-');
+                    $r2++;
                 }
-                $r2++;
-            }
 
-            foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G'] as $col) {
-                $sheet2->getColumnDimension($col)->setAutoSize(true);
+                $sheet2->setCellValue('A'.$r2, 'TOTAL BARANG MASUK');
+                $sheet2->mergeCells('A'.$r2.':D'.$r2);
+                $sheet2->setCellValue('E'.$r2, '=SUM(E5:E'.($r2 - 1).')');
+                $sheet2->getStyle('A'.$r2.':F'.$r2)->getFont()->setBold(true);
+                $sheet2->getStyle('A'.$r2.':F'.$r2)->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
+                $sheet2->getStyle('A'.$r2.':F'.$r2)->getBorders()->getBottom()->setBorderStyle(Border::BORDER_DOUBLE);
+
+                foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $col) {
+                    $sheet2->getColumnDimension($col)->setAutoSize(true);
+                }
+            } elseif ($reportType === 'outgoing') {
+                $sheet2->setTitle('Barang Keluar');
+                $sheet2->mergeCells('A1:F1');
+                $sheet2->setCellValue('A1', 'LAPORAN TRANSAKSI BARANG KELUAR');
+                $sheet2->getStyle('A1')->getFont()->setBold(true)->setSize(13)->setColor(new Color(Color::COLOR_WHITE));
+                $sheet2->getStyle('A1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('0F172A');
+                $sheet2->getRowDimension(1)->setRowHeight(28);
+
+                $sheet2->setCellValue('A2', 'Periode: '.$startDate.' s/d '.$endDate);
+                $sheet2->getStyle('A2')->getFont()->setItalic(true)->setColor(new Color('64748B'));
+
+                $sheet2->fromArray(['No. Bon / Referensi', 'Tanggal & Waktu', 'Kode Barang', 'Nama Sparepart', 'Jumlah Keluar', 'Penerima / Peruntukan'], null, 'A4');
+                $sheet2->getStyle('A4:F4')->getFont()->setBold(true)->setColor(new Color(Color::COLOR_WHITE));
+                $sheet2->getStyle('A4:F4')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('1E293B');
+
+                $outgoingItems = OutgoingItem::with(['item.category', 'item.unit'])
+                    ->whereBetween('date', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
+                    ->latest('date')
+                    ->get();
+
+                $r2 = 5;
+                foreach ($outgoingItems as $tx) {
+                    $sheet2->setCellValue('A'.$r2, $tx->reference_no);
+                    $sheet2->setCellValue('B'.$r2, Carbon::parse($tx->date)->format('d/m/Y H:i'));
+                    $sheet2->setCellValue('C'.$r2, $tx->item?->item_code ?? '-');
+                    $sheet2->setCellValue('D'.$r2, $tx->item?->name ?? '-');
+                    $sheet2->setCellValue('E'.$r2, $tx->quantity);
+                    $sheet2->setCellValue('F'.$r2, $tx->recipient ?? '-');
+                    $r2++;
+                }
+
+                $sheet2->setCellValue('A'.$r2, 'TOTAL BARANG KELUAR');
+                $sheet2->mergeCells('A'.$r2.':D'.$r2);
+                $sheet2->setCellValue('E'.$r2, '=SUM(E5:E'.($r2 - 1).')');
+                $sheet2->getStyle('A'.$r2.':F'.$r2)->getFont()->setBold(true);
+                $sheet2->getStyle('A'.$r2.':F'.$r2)->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
+                $sheet2->getStyle('A'.$r2.':F'.$r2)->getBorders()->getBottom()->setBorderStyle(Border::BORDER_DOUBLE);
+
+                foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $col) {
+                    $sheet2->getColumnDimension($col)->setAutoSize(true);
+                }
+            } else {
+                $sheet2->setTitle('Data Sparepart');
+                $sheet2->mergeCells('A1:G1');
+                $sheet2->setCellValue('A1', 'MASTER SPAREPART & STATUS STOK GUDANG');
+                $sheet2->getStyle('A1')->getFont()->setBold(true)->setSize(13)->setColor(new Color(Color::COLOR_WHITE));
+                $sheet2->getStyle('A1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('0F172A');
+                $sheet2->getRowDimension(1)->setRowHeight(28);
+
+                $sheet2->fromArray(['Kode Barang', 'Nama Sparepart', 'Kategori', 'Satuan', 'Sisa Stok', 'Stok Min', 'Status Stok'], null, 'A3');
+                $sheet2->getStyle('A3:G3')->getFont()->setBold(true)->setColor(new Color(Color::COLOR_WHITE));
+                $sheet2->getStyle('A3:G3')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('1E293B');
+
+                $items = Item::with(['category', 'unit'])->orderBy('name')->get();
+                $r2 = 4;
+                foreach ($items as $item) {
+                    $isLow = $item->stock <= $item->min_stock;
+                    $sheet2->setCellValue('A'.$r2, $item->item_code);
+                    $sheet2->setCellValue('B'.$r2, $item->name);
+                    $sheet2->setCellValue('C'.$r2, $item->category?->name ?? '-');
+                    $sheet2->setCellValue('D'.$r2, $item->unit?->name ?? '-');
+                    $sheet2->setCellValue('E'.$r2, $item->stock);
+                    $sheet2->setCellValue('F'.$r2, $item->min_stock);
+                    $sheet2->setCellValue('G'.$r2, $isLow ? 'KRITIS' : 'AMAN');
+
+                    if ($isLow) {
+                        $sheet2->getStyle('G'.$r2)->getFont()->setBold(true)->setColor(new Color('DC2626'));
+                    } else {
+                        $sheet2->getStyle('G'.$r2)->getFont()->setColor(new Color('16A34A'));
+                    }
+                    $r2++;
+                }
+
+                foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G'] as $col) {
+                    $sheet2->getColumnDimension($col)->setAutoSize(true);
+                }
             }
 
             $fileName = 'Laporan_Gudang_Diesel_'.now()->format('Ymd_His').'.xlsx';

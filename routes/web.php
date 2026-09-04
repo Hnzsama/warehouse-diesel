@@ -48,7 +48,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Laporan Persediaan (Admin Utama, Pemilik, & Admin QC)
     Route::middleware(['role:admin|pemilik|admin_qc'])->group(function () {
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
+        Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export-pdf');
+        Route::get('/reports/print', [ReportController::class, 'exportPdf'])->name('reports.print');
         Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
     });
 });

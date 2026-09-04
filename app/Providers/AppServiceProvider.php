@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-       $this->configureDefaults();
+        $this->configureDefaults();
 
         if ($this->app->environment('production')) {
             $this->app->usePublicPath(base_path('../'));

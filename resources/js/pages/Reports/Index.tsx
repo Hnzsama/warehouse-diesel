@@ -63,9 +63,8 @@ export default function ReportsIndex({ reportType, period = 'monthly', startDate
         router.get('/reports', { report_type: type, period: selectedPeriod, start_date: start, end_date: end });
     };
 
-    const handlePrint = () => {
-        const url = `/reports/print?report_type=${reportType}&period=${selectedPeriod}&start_date=${startDate}&end_date=${endDate}`;
-        window.open(url, '_blank');
+    const handleExportPdf = () => {
+        window.location.href = `/reports/export-pdf?report_type=${type}&period=${selectedPeriod}&start_date=${start}&end_date=${end}`;
     };
 
     return (
@@ -86,14 +85,14 @@ export default function ReportsIndex({ reportType, period = 'monthly', startDate
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                        <Button onClick={handlePrint} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
+                        <Button onClick={handleExportPdf} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
                             <Printer className="h-4 w-4" />
-                            <span>Cetak Laporan / Export PDF</span>
+                            <span>Download File PDF</span>
                         </Button>
                         <Button asChild variant="outline" className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center border-emerald-500/30 hover:border-emerald-500 text-emerald-600 dark:text-emerald-400">
-                            <a href={`/reports/export-excel?period=${selectedPeriod}&start_date=${start}&end_date=${end}`} target="_blank" rel="noopener noreferrer">
+                            <a href={`/reports/export-excel?report_type=${type}&period=${selectedPeriod}&start_date=${start}&end_date=${end}`} target="_blank" rel="noopener noreferrer">
                                 <FileSpreadsheet className="h-4 w-4" />
-                                <span>Export Excel + Chart</span>
+                                <span>Export Excel</span>
                             </a>
                         </Button>
                     </div>
