@@ -2,6 +2,7 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import {
     AlertTriangle,
     CheckCircle2,
+    Filter,
     Plus,
     Search,
     Shield,
@@ -75,6 +76,54 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Manajemen Pengguna', href: '/users' },
 ];
 
+const getRoleBadge = (user?: any) => {
+    if (!user) return null;
+    const roles = user.roles || [];
+    const isAdmin = roles.some((r: any) => (typeof r === 'string' ? r === 'admin' : r?.name === 'admin'));
+    const isOwner = roles.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'));
+    const isStaf = roles.some((r: any) => (typeof r === 'string' ? r === 'staf_operasional' : r?.name === 'staf_operasional'));
+    const isQc = roles.some((r: any) => (typeof r === 'string' ? r === 'admin_qc' : r?.name === 'admin_qc'));
+
+    if (isAdmin) {
+        return (
+            <Badge variant="outline" className="gap-1 whitespace-nowrap bg-red-500/10 text-red-600 border-red-500/20 font-bold dark:text-red-400">
+                <Shield className="h-3 w-3 text-red-500" />
+                <span>Admin Gudang</span>
+            </Badge>
+        );
+    }
+    if (isOwner) {
+        return (
+            <Badge variant="outline" className="gap-1 whitespace-nowrap bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold dark:text-amber-400">
+                <Shield className="h-3 w-3 text-amber-500" />
+                <span>Pemilik (Owner)</span>
+            </Badge>
+        );
+    }
+    if (isStaf) {
+        return (
+            <Badge variant="outline" className="gap-1 whitespace-nowrap bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold dark:text-emerald-400">
+                <Shield className="h-3 w-3 text-emerald-500" />
+                <span>Staf Operasional</span>
+            </Badge>
+        );
+    }
+    if (isQc) {
+        return (
+            <Badge variant="outline" className="gap-1 whitespace-nowrap bg-purple-500/10 text-purple-600 border-purple-500/20 font-bold dark:text-purple-400">
+                <Shield className="h-3 w-3 text-purple-500" />
+                <span>Admin QC</span>
+            </Badge>
+        );
+    }
+    return (
+        <Badge variant="outline" className="gap-1 whitespace-nowrap bg-muted text-muted-foreground border-border font-medium">
+            <Shield className="h-3 w-3" />
+            <span>Pengguna</span>
+        </Badge>
+    );
+};
+
 export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
     const { auth, flash } = usePage<SharedData>().props;
     const currentUser = auth.user;
@@ -90,7 +139,7 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
         name: '',
         email: '',
         password: '',
-        role: 'admin',
+        role: 'staf_operasional',
     });
 
     const handleSearch = (e: React.FormEvent) => {
@@ -105,7 +154,7 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
             name: '',
             email: '',
             password: '',
-            role: 'admin',
+            role: 'staf_operasional',
         });
         clearErrors();
         setIsModalOpen(true);
@@ -114,7 +163,7 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
     const openEditModal = (u: UserItem) => {
         setEditingUser(u);
         clearErrors();
-        const primaryRole = u.roles && u.roles.length > 0 ? u.roles[0].name : 'admin';
+        const primaryRole = u.roles && u.roles.length > 0 ? u.roles[0].name : 'staf_operasional';
         setData({
             name: u.name,
             email: u.email,
@@ -149,7 +198,7 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
 
     return (
         <>
-            <Head title="Manajemen Admin Gudang & Pengguna" />
+            <Head title="Manajemen Pengguna & Staf Gudang" />
 
             <div className="flex flex-1 flex-col gap-5 p-3 sm:p-4 md:p-6 w-full max-w-full overflow-hidden">
                 {/* Flash Messages */}
@@ -171,35 +220,51 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                     <div>
                         <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
                             <UserCheck className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
-                            <span>Manajemen Pengguna</span>
+                            <span>Manajemen Pengguna & Staf</span>
                         </h1>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                            Kelola staf Admin Gudang baru dan otorisasi akses pengguna sistem. Klik baris untuk mengedit.
+                            Kelola akun pengguna, Admin Gudang, Staf Operasional, dan Admin QC. Klik baris untuk mengedit data pengguna.
                         </p>
                     </div>
 
                     <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
                         <UserPlus className="h-4 w-4" />
-                        <span>+ Tambah Admin Gudang Baru</span>
+                        <span>+ Tambah Pengguna Baru</span>
                     </Button>
                 </div>
 
                 {/* Filter Bar */}
                 <Card>
                     <CardContent className="p-3 sm:p-4">
-                        <form onSubmit={handleSearch} className="flex gap-2">
-                            <div className="relative flex-1">
+                        <form onSubmit={handleSearch} className="grid gap-3 grid-cols-1 sm:grid-cols-3">
+                            <div className="relative w-full">
                                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     type="text"
-                                    placeholder="Cari nama / email admin..."
+                                    placeholder="Cari nama / email pengguna..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="pl-9 w-full"
                                 />
                             </div>
-                            <Button type="submit" variant="secondary" className="cursor-pointer">
-                                Cari
+
+                            <div className="w-full">
+                                <select
+                                    value={roleFilter}
+                                    onChange={(e) => setRoleFilter(e.target.value)}
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+                                >
+                                    <option value="">-- Semua Peran Akses --</option>
+                                    <option value="admin">🔴 Admin Gudang</option>
+                                    <option value="staf_operasional">🟢 Staf Operasional</option>
+                                    <option value="admin_qc">🟣 Admin QC</option>
+                                    <option value="pemilik">🟡 Pemilik (Owner)</option>
+                                </select>
+                            </div>
+
+                            <Button type="submit" variant="secondary" className="gap-1.5 cursor-pointer justify-center">
+                                <Filter className="h-4 w-4" />
+                                <span>Filter</span>
                             </Button>
                         </form>
                     </CardContent>
@@ -214,7 +279,7 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                                     <TableRow className="hover:bg-transparent">
                                         <TableHead className="min-w-[150px]">Nama Pengguna</TableHead>
                                         <TableHead className="min-w-[180px]">Alamat Email</TableHead>
-                                        <TableHead className="text-center min-w-[120px]">Peran Akses</TableHead>
+                                        <TableHead className="text-center min-w-[140px]">Peran Akses</TableHead>
                                         <TableHead className="text-center w-[80px]">Hapus</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -227,7 +292,6 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                                         </TableRow>
                                     ) : (
                                         users.data.map((u) => {
-                                            const isAdminRole = u.roles?.some((r) => r.name === 'admin');
                                             const isSelf = u.id === currentUser.id;
                                             return (
                                                 <TableRow
@@ -247,7 +311,7 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                                                             <div className="flex flex-wrap items-center gap-1.5">
                                                                 <span>{u.name}</span>
                                                                 {isSelf && (
-                                                                    <Badge variant="outline" className="text-[10px] py-0 px-1.5 bg-primary/10 text-primary border-primary/30">
+                                                                    <Badge variant="outline" className="text-[10px] py-0 px-1.5 bg-primary/10 text-primary border-primary/30 font-bold">
                                                                         Akun Anda
                                                                     </Badge>
                                                                 )}
@@ -256,17 +320,7 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                                                     </TableCell>
                                                     <TableCell className="font-mono text-xs text-muted-foreground break-all">{u.email}</TableCell>
                                                     <TableCell className="text-center">
-                                                        <Badge
-                                                            variant="outline"
-                                                            className={`gap-1 whitespace-nowrap ${
-                                                                isAdminRole
-                                                                    ? 'bg-primary/10 text-primary border-primary/20 font-medium'
-                                                                    : 'bg-muted/60 text-muted-foreground border-border font-normal'
-                                                            }`}
-                                                        >
-                                                            <Shield className="h-3 w-3" />
-                                                            <span>{isAdminRole ? 'Admin Gudang' : 'Pemilik (Owner)'}</span>
-                                                        </Badge>
+                                                        {getRoleBadge(u)}
                                                     </TableCell>
                                                     <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
                                                         {!isSelf ? (
@@ -302,7 +356,7 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
                             <UserCheck className="h-5 w-5 text-primary" />
-                            <span>{editingUser ? 'Edit Data Pengguna' : 'Tambah Admin Gudang Baru'}</span>
+                            <span>{editingUser ? 'Edit Data Pengguna' : 'Tambah Pengguna Baru'}</span>
                         </DialogTitle>
                     </DialogHeader>
 
@@ -348,11 +402,19 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                         </div>
 
                         <div>
-                            <Label className="mb-1 block">Peran Akses Sistem *</Label>
-                            <div className="flex items-center gap-2 rounded-md border border-border bg-muted p-2.5 text-xs text-foreground font-medium">
-                                <Shield className="h-4 w-4 text-primary shrink-0" />
-                                <span>Admin Gudang (Akses Penuh Operator Gudang)</span>
-                            </div>
+                            <Label htmlFor="usr_role" className="mb-1 block">Peran Akses Sistem *</Label>
+                            <Select value={data.role} onValueChange={(val) => setData('role', val)}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Pilih Peran Akses" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="admin">🔴 Admin Gudang (Akses Penuh Operator & Sistem)</SelectItem>
+                                    <SelectItem value="staf_operasional">🟢 Staf Operasional (Barang Masuk & Keluar)</SelectItem>
+                                    <SelectItem value="admin_qc">🟣 Admin QC (Stok Opname & Barang Rusak)</SelectItem>
+                                    <SelectItem value="pemilik">🟡 Pemilik / Executive (Monitoring & Laporan)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {errors.role && <p className="mt-1 text-xs text-destructive">{errors.role}</p>}
                         </div>
 
                         <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
@@ -373,3 +435,4 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
 UsersIndex.layout = {
     breadcrumbs: breadcrumbs,
 };
+

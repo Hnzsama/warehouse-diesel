@@ -20,10 +20,7 @@ class UserController extends Controller
     public function index(Request $request): Response
     {
         try {
-            // Tampilkan user selain pemilik
-            $query = User::whereHas('roles', function ($q) {
-                $q->whereIn('name', ['admin', 'staf_operasional', 'admin_qc']);
-            })->with('roles');
+            $query = User::with('roles');
 
             if ($request->filled('search')) {
                 $search = $request->input('search');
@@ -33,20 +30,25 @@ class UserController extends Controller
                 });
             }
 
+            if ($request->filled('role')) {
+                $role = $request->input('role');
+                $query->whereHas('roles', function ($q) use ($role) {
+                    $q->where('name', $role);
+                });
+            }
+
             $users = $query->orderBy('name')->paginate(10)->withQueryString();
-            $roles = Role::whereIn('name', ['admin', 'staf_operasional', 'admin_qc'])->get(['id', 'name']);
+            $roles = Role::all(['id', 'name']);
 
             return Inertia::render('Users/Index', [
                 'users' => $users,
                 'roles' => $roles,
-                'filters' => $request->only(['search']),
+                'filters' => $request->only(['search', 'role']),
             ]);
         } catch (\Throwable $e) {
             return Inertia::render('Users/Index', [
-                'users' => User::whereHas('roles', function ($q) {
-                    $q->whereIn('name', ['admin', 'staf_operasional', 'admin_qc']);
-                })->with('roles')->paginate(10)->withQueryString(),
-                'roles' => Role::whereIn('name', ['admin', 'staf_operasional', 'admin_qc'])->get(['id', 'name']),
+                'users' => User::with('roles')->paginate(10)->withQueryString(),
+                'roles' => Role::all(['id', 'name']),
                 'filters' => [],
             ]);
         }
@@ -61,7 +63,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'string', Password::defaults()],
-            'role' => 'required|string|in:admin,staf_operasional,admin_qc',
+            'role' => 'required|string|in:admin,staf_operasional,admin_qc,pemilik',
         ]);
 
         try {
@@ -90,7 +92,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'password' => ['nullable', 'string', Password::defaults()],
-            'role' => 'required|string|in:admin,staf_operasional,admin_qc',
+            'role' => 'required|string|in:admin,staf_operasional,admin_qc,pemilik',
         ]);
 
         try {
