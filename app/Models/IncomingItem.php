@@ -16,6 +16,7 @@ class IncomingItem extends Model
     protected $fillable = [
         'reference_no',
         'item_id',
+        'supplier_id',
         'quantity',
         'date',
         'supplier',
@@ -49,6 +50,16 @@ class IncomingItem extends Model
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
+    }
+
+    /**
+     * Get the supplier associated with this transaction.
+     *
+     * @return BelongsTo<Supplier, $this>
+     */
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     /**

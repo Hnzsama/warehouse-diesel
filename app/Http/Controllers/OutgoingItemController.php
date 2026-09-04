@@ -6,6 +6,7 @@ use App\Helpers\ImageHelper;
 use App\Helpers\ReferenceNumberGenerator;
 use App\Models\Item;
 use App\Models\OutgoingItem;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class OutgoingItemController extends Controller
             $endDate = $request->input('end_date');
             $userId = $request->input('user_id');
 
-            $query = OutgoingItem::with(['item.category', 'item.unit', 'user.roles', 'editLogs.user.roles']);
+            $query = OutgoingItem::with(['item.category', 'item.unit', 'supplier', 'user.roles', 'editLogs.user.roles']);
 
             if (! $request->user()->hasAnyRole(['admin', 'pemilik'])) {
                 $query->where('user_id', $request->user()->id);
@@ -42,6 +43,10 @@ class OutgoingItemController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->where('reference_no', 'like', "%{$search}%")
                         ->orWhere('recipient', 'like', "%{$search}%")
+                        ->orWhereHas('supplier', function ($sq) use ($search) {
+                            $sq->where('name', 'like', "%{$search}%")
+                                ->orWhere('code', 'like', "%{$search}%");
+                        })
                         ->orWhereHas('item', function ($iq) use ($search) {
                             $iq->where('name', 'like', "%{$search}%")
                                 ->orWhere('item_code', 'like', "%{$search}%");
@@ -56,11 +61,13 @@ class OutgoingItemController extends Controller
             $outgoingItems = $query->latest('date')->latest('id')->paginate(10)->withQueryString();
 
             $items = Item::with(['category', 'unit'])->orderBy('name')->get();
+            $suppliers = Supplier::orderBy('name')->get();
             $users = User::with('roles')->orderBy('name')->get();
 
             return Inertia::render('OutgoingItems/Index', [
                 'outgoingItems' => $outgoingItems,
                 'items' => $items,
+                'suppliers' => $suppliers,
                 'users' => $users,
                 'filters' => [
                     'search' => $search,
@@ -84,6 +91,7 @@ class OutgoingItemController extends Controller
             $validated = $request->validate([
                 'reference_no' => ['required', 'string', 'max:50', 'unique:outgoing_items,reference_no'],
                 'item_id' => ['required', 'exists:items,id'],
+                'supplier_id' => ['nullable', 'exists:suppliers,id'],
                 'quantity' => ['required', 'integer', 'min:1'],
                 'date' => ['required', 'date'],
                 'recipient' => ['nullable', 'string', 'max:100'],
@@ -137,6 +145,7 @@ class OutgoingItemController extends Controller
             $validated = $request->validate([
                 'reference_no' => ['required', 'string', 'max:50', 'unique:outgoing_items,reference_no,'.$outgoingItem->id],
                 'item_id' => ['required', 'exists:items,id'],
+                'supplier_id' => ['nullable', 'exists:suppliers,id'],
                 'quantity' => ['required', 'integer', 'min:1'],
                 'date' => ['required', 'date'],
                 'recipient' => ['nullable', 'string', 'max:100'],

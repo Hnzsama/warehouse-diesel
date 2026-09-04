@@ -254,7 +254,9 @@ export default function ReportsIndex({ reportType, period = 'monthly', startDate
                                                 <td className="px-4 py-3 font-medium whitespace-nowrap">{formatDate(tx.date)}</td>
                                                 <td className="px-4 py-3 font-medium">{tx.item?.name}</td>
                                                 <td className="px-4 py-3 text-center font-bold text-emerald-500 dark:text-emerald-400 whitespace-nowrap">+{tx.quantity} {tx.item?.unit?.short_name}</td>
-                                                <td className="px-4 py-3 text-muted-foreground">{tx.supplier || '-'}</td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {typeof tx.supplier === 'object' && tx.supplier ? tx.supplier.name : (tx.supplier || '-')}
+                                                </td>
                                                 <td className="px-4 py-3 text-xs text-muted-foreground">{tx.user?.name}</td>
                                             </tr>
                                         ))}

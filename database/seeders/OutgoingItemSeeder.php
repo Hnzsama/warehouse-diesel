@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Item;
 use App\Models\OutgoingItem;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -16,6 +17,7 @@ class OutgoingItemSeeder extends Seeder
     {
         $admin = User::firstWhere('email', 'admin@gudangdiesel.com');
         $items = Item::all();
+        $suppliers = Supplier::all();
 
         if ($items->isEmpty() || ! $admin) {
             return;
@@ -114,11 +116,13 @@ class OutgoingItemSeeder extends Seeder
 
         foreach ($outgoingData as $index => $data) {
             $item = $items[$index % $items->count()];
+            $supplierObj = $suppliers->isNotEmpty() ? $suppliers[$index % $suppliers->count()] : null;
 
             OutgoingItem::firstOrCreate(
                 ['reference_no' => $data['reference_no']],
                 [
                     'item_id' => $item->id,
+                    'supplier_id' => $supplierObj?->id,
                     'user_id' => $admin->id,
                     'date' => $data['date'],
                     'quantity' => $data['quantity'],

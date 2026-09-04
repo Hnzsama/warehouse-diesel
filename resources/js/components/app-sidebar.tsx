@@ -9,6 +9,7 @@ import {
     ShieldCheck,
     SlidersHorizontal,
     Tags,
+    Truck,
     UserCheck,
 } from 'lucide-react';
 import AppLogoIcon from '@/components/app-logo-icon';
@@ -168,6 +169,20 @@ export function AppSidebar() {
                                             <Link href="/units">
                                                 <Package className="h-4 w-4" />
                                                 <span>Satuan Barang</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+
+                                    <SidebarMenuItem>
+                                        <SidebarMenuButton
+                                            asChild
+                                            isActive={isCurrentUrl('/suppliers')}
+                                            tooltip="Data Supplier"
+                                            className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
+                                        >
+                                            <Link href="/suppliers">
+                                                <Truck className="h-4 w-4 text-sky-500" />
+                                                <span>Data Supplier</span>
                                             </Link>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>

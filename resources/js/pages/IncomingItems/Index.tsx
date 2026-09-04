@@ -28,6 +28,12 @@ type UserOption = {
     is_qc?: boolean;
 };
 
+type SupplierOption = {
+    id: number;
+    code: string;
+    name: string;
+};
+
 type Item = {
     id: number;
     item_code: string;
@@ -49,7 +55,8 @@ type IncomingItem = {
     reference_no: string;
     date: string;
     quantity: number;
-    supplier: string | null;
+    supplier_id: number | null;
+    supplier: SupplierOption | string | null;
     notes: string | null;
     invoice_image: string | null;
     invoice_image_url: string | null;
@@ -70,6 +77,7 @@ type PaginatedData<T> = {
 type IncomingItemsIndexProps = {
     incomingItems: PaginatedData<IncomingItem>;
     items: Item[];
+    suppliers?: SupplierOption[];
     users?: UserOption[];
     filters: {
         search?: string;
@@ -169,7 +177,7 @@ const formatForDateTimeLocal = (dateStr: string | Date | null) => {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
-export default function IncomingItemsIndex({ incomingItems, items, users = [], filters }: IncomingItemsIndexProps) {
+export default function IncomingItemsIndex({ incomingItems, items, suppliers = [], users = [], filters }: IncomingItemsIndexProps) {
     const { flash } = usePage<SharedData>().props;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<IncomingItem | null>(null);
@@ -183,6 +191,7 @@ export default function IncomingItemsIndex({ incomingItems, items, users = [], f
     const { data, setData, post, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         reference_no: `IN-${Date.now().toString().slice(-6)}`,
         item_id: '',
+        supplier_id: '',
         quantity: 1,
         date: formatForDateTimeLocal(new Date()),
         supplier: '',
@@ -206,6 +215,7 @@ export default function IncomingItemsIndex({ incomingItems, items, users = [], f
         setData({
             reference_no: `IN-${Date.now().toString().slice(-6)}`,
             item_id: '',
+            supplier_id: '',
             quantity: 1,
             date: formatForDateTimeLocal(new Date()),
             supplier: '',
@@ -220,12 +230,14 @@ export default function IncomingItemsIndex({ incomingItems, items, users = [], f
     const openEditModal = (tx: IncomingItem) => {
         setEditingItem(tx);
         clearErrors();
+        const supName = typeof tx.supplier === 'object' && tx.supplier ? tx.supplier.name : (tx.supplier || '');
         setData({
             reference_no: tx.reference_no,
             item_id: String(tx.item_id || tx.item?.id || ''),
+            supplier_id: tx.supplier_id ? String(tx.supplier_id) : '',
             quantity: tx.quantity,
             date: formatForDateTimeLocal(tx.date),
-            supplier: tx.supplier || '',
+            supplier: supName,
             notes: tx.notes || '',
             invoice_image: null,
             _method: 'PUT',
@@ -386,7 +398,9 @@ export default function IncomingItemsIndex({ incomingItems, items, users = [], f
                                                             +{tx.quantity} {tx.item?.unit?.short_name}
                                                         </Badge>
                                                     </td>
-                                                    <td className="px-4 py-3.5 text-muted-foreground">{tx.supplier || '-'}</td>
+                                                    <td className="px-4 py-3.5 text-muted-foreground font-medium">
+                                                        {typeof tx.supplier === 'object' && tx.supplier ? tx.supplier.name : (tx.supplier || '-')}
+                                                    </td>
                                                     <td className="px-4 py-3.5 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                                                         {tx.invoice_image_url ? (
                                                             <button
@@ -505,14 +519,25 @@ export default function IncomingItemsIndex({ incomingItems, items, users = [], f
                         </div>
 
                         <div>
-                            <Label htmlFor="supplier">Supplier / Distributor (Opsional)</Label>
-                            <Input
-                                id="supplier"
-                                placeholder="Contoh: PT Kencana Diesel Parts"
-                                value={data.supplier}
-                                onChange={(e) => setData('supplier', e.target.value)}
-                                className="mt-1"
+                            <Label htmlFor="supplier_id" className="mb-1 block">Pilih Supplier / Distributor (Opsional)</Label>
+                            <Combobox
+                                options={suppliers.map((sup) => ({
+                                    value: String(sup.id),
+                                    label: `[${sup.code}] ${sup.name}`,
+                                }))}
+                                value={data.supplier_id}
+                                onValueChange={(val) => {
+                                    const found = suppliers.find((s) => String(s.id) === val);
+                                    setData((prev) => ({
+                                        ...prev,
+                                        supplier_id: val,
+                                        supplier: found ? found.name : prev.supplier,
+                                    }));
+                                }}
+                                placeholder="-- Pilih Data Supplier --"
+                                searchPlaceholder="Ketik nama atau kode supplier..."
                             />
+                            {errors.supplier_id && <p className="mt-1 text-xs text-destructive">{errors.supplier_id}</p>}
                         </div>
 
                         <div>

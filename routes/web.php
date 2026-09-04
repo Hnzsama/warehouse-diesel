@@ -7,6 +7,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\OutgoingItemController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -35,10 +36,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('items', ItemController::class)->except(['create', 'edit', 'show']);
     });
 
-    // Kategori, Satuan, & Pengguna (Admin Utama & Pemilik)
+    // Kategori, Satuan, Supplier, & Pengguna (Admin Utama & Pemilik)
     Route::middleware(['role:admin|pemilik'])->group(function () {
         Route::resource('categories', CategoryController::class)->except(['create', 'edit', 'show']);
         Route::resource('units', UnitController::class)->except(['create', 'edit', 'show']);
+        Route::resource('suppliers', SupplierController::class)->except(['create', 'edit', 'show']);
         Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
     });
 

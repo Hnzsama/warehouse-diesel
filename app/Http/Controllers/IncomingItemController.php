@@ -6,6 +6,7 @@ use App\Helpers\ImageHelper;
 use App\Helpers\ReferenceNumberGenerator;
 use App\Models\IncomingItem;
 use App\Models\Item;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class IncomingItemController extends Controller
             $endDate = $request->input('end_date');
             $userId = $request->input('user_id');
 
-            $query = IncomingItem::with(['item.category', 'item.unit', 'user.roles', 'editLogs.user.roles']);
+            $query = IncomingItem::with(['item.category', 'item.unit', 'supplier', 'user.roles', 'editLogs.user.roles']);
 
             if (! $request->user()->hasAnyRole(['admin', 'pemilik'])) {
                 $query->where('user_id', $request->user()->id);
@@ -42,6 +43,10 @@ class IncomingItemController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->where('reference_no', 'like', "%{$search}%")
                         ->orWhere('supplier', 'like', "%{$search}%")
+                        ->orWhereHas('supplier', function ($sq) use ($search) {
+                            $sq->where('name', 'like', "%{$search}%")
+                                ->orWhere('code', 'like', "%{$search}%");
+                        })
                         ->orWhereHas('item', function ($iq) use ($search) {
                             $iq->where('name', 'like', "%{$search}%")
                                 ->orWhere('item_code', 'like', "%{$search}%");
@@ -56,11 +61,13 @@ class IncomingItemController extends Controller
             $incomingItems = $query->latest('date')->latest('id')->paginate(10)->withQueryString();
 
             $items = Item::with(['category', 'unit'])->orderBy('name')->get();
+            $suppliers = Supplier::orderBy('name')->get();
             $users = User::with('roles')->orderBy('name')->get();
 
             return Inertia::render('IncomingItems/Index', [
                 'incomingItems' => $incomingItems,
                 'items' => $items,
+                'suppliers' => $suppliers,
                 'users' => $users,
                 'filters' => [
                     'search' => $search,
@@ -84,12 +91,20 @@ class IncomingItemController extends Controller
             $validated = $request->validate([
                 'reference_no' => ['required', 'string', 'max:50', 'unique:incoming_items,reference_no'],
                 'item_id' => ['required', 'exists:items,id'],
+                'supplier_id' => ['nullable', 'exists:suppliers,id'],
                 'quantity' => ['required', 'integer', 'min:1'],
                 'date' => ['required', 'date'],
                 'supplier' => ['nullable', 'string', 'max:100'],
                 'notes' => ['nullable', 'string'],
                 'invoice_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             ]);
+
+            if (! empty($validated['supplier_id'])) {
+                $supplierObj = Supplier::find($validated['supplier_id']);
+                if ($supplierObj) {
+                    $validated['supplier'] = $supplierObj->name;
+                }
+            }
 
             if (empty($validated['reference_no'])) {
                 $validated['reference_no'] = ReferenceNumberGenerator::generateIncomingRef();
@@ -129,12 +144,20 @@ class IncomingItemController extends Controller
             $validated = $request->validate([
                 'reference_no' => ['required', 'string', 'max:50', 'unique:incoming_items,reference_no,'.$incomingItem->id],
                 'item_id' => ['required', 'exists:items,id'],
+                'supplier_id' => ['nullable', 'exists:suppliers,id'],
                 'quantity' => ['required', 'integer', 'min:1'],
                 'date' => ['required', 'date'],
                 'supplier' => ['nullable', 'string', 'max:100'],
                 'notes' => ['nullable', 'string'],
                 'invoice_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             ]);
+
+            if (! empty($validated['supplier_id'])) {
+                $supplierObj = Supplier::find($validated['supplier_id']);
+                if ($supplierObj) {
+                    $validated['supplier'] = $supplierObj->name;
+                }
+            }
 
             if ($request->hasFile('invoice_image')) {
                 if ($incomingItem->invoice_image) {

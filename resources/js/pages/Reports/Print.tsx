@@ -125,7 +125,9 @@ export default function ReportsPrint({
                                 <td className="border border-slate-300 px-3 py-2">{formatDate(tx.date)}</td>
                                 <td className="border border-slate-300 px-3 py-2 font-medium">{tx.item?.name}</td>
                                 <td className="border border-slate-300 px-3 py-2 text-center font-bold">+{tx.quantity} {tx.item?.unit?.short_name}</td>
-                                <td className="border border-slate-300 px-3 py-2">{tx.supplier || '-'}</td>
+                                <td className="border border-slate-300 px-3 py-2">
+                                    {typeof tx.supplier === 'object' && tx.supplier ? tx.supplier.name : (tx.supplier || '-')}
+                                </td>
                                 <td className="border border-slate-300 px-3 py-2">{tx.user?.name || '-'}</td>
                             </tr>
                         ))}
