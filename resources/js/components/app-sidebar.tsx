@@ -51,7 +51,7 @@ export function AppSidebar() {
 
     const hasMasterAccess = isAdmin || isOwner || isQc;
     const hasTransactionAccess = isAdmin || isOwner || isStaf || isQc;
-    const hasReportAccess = isAdmin || isOwner;
+    const hasReportAccess = isAdmin || isOwner || isQc;
 
     const roleBadgeText = user?.role_label || (isAdmin ? 'Admin Utama' : isOwner ? 'Pemilik (Owner)' : isStaf ? 'Staf Operasional' : isQc ? 'Admin QC' : 'Pengguna');
 

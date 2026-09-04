@@ -42,8 +42,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
     });
 
-    // Laporan Persediaan (Admin Utama & Pemilik)
-    Route::middleware(['role:admin|pemilik'])->group(function () {
+    // Laporan Persediaan (Admin Utama, Pemilik, & Admin QC)
+    Route::middleware(['role:admin|pemilik|admin_qc'])->group(function () {
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
         Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
