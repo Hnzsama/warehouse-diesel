@@ -314,43 +314,71 @@ html_content = """<!DOCTYPE html>
             <tbody>
                 <tr>
                     <td><span class="tag-pemilik">Pemilik (Owner)</span></td>
-                    <td><strong>Bapak Hartono</strong></td>
-                    <td><code>pemilik@gudangdiesel.com</code></td>
+                    <td><strong>Steven Sanjaya</strong></td>
+                    <td><code>steven.owner@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
                     <td>Overview / Owner</td>
                 </tr>
                 <tr>
                     <td><span class="tag-admin">Admin Gudang</span></td>
-                    <td><strong>Admin Gudang Utama</strong></td>
+                    <td><strong>Bagus Miftah Nur Haqqi</strong></td>
                     <td><code>admin@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
                     <td>Full Operasional</td>
                 </tr>
                 <tr>
                     <td><span class="tag-admin">Admin Gudang</span></td>
-                    <td>Budi Santoso (Shift Pagi)</td>
-                    <td><code>budi.admin@gudangdiesel.com</code></td>
+                    <td>Masgo</td>
+                    <td><code>masgo@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
                     <td>Operasional Staf</td>
                 </tr>
                 <tr>
                     <td><span class="tag-admin">Admin Gudang</span></td>
-                    <td>Agus Setiawan (Shift Siang)</td>
-                    <td><code>agus.admin@gudangdiesel.com</code></td>
+                    <td>Muhammad Herie Ilyas Asfari</td>
+                    <td><code>ilyas@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
                     <td>Operasional Staf</td>
                 </tr>
                 <tr>
                     <td><span class="tag-admin">Admin Gudang</span></td>
-                    <td>Rudi Hermawan (Stock Opname)</td>
-                    <td><code>rudi.admin@gudangdiesel.com</code></td>
+                    <td>Putri Nurkasih</td>
+                    <td><code>putri@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
                     <td>Operasional Staf</td>
                 </tr>
                 <tr>
                     <td><span class="tag-admin">Admin Gudang</span></td>
-                    <td>Dewi Lestari (Logistik)</td>
-                    <td><code>dewi.admin@gudangdiesel.com</code></td>
+                    <td>Saghifa Fitriana</td>
+                    <td><code>saghifa@gudangdiesel.com</code></td>
+                    <td><code>password</code></td>
+                    <td>Operasional Staf</td>
+                </tr>
+                <tr>
+                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td>Muhammad Vito Arya Apriza</td>
+                    <td><code>vito@gudangdiesel.com</code></td>
+                    <td><code>password</code></td>
+                    <td>Operasional Staf</td>
+                </tr>
+                <tr>
+                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td>Revo Mulia Alamsyah Harahap</td>
+                    <td><code>revo@gudangdiesel.com</code></td>
+                    <td><code>password</code></td>
+                    <td>Operasional Staf</td>
+                </tr>
+                <tr>
+                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td>Rum Mohamad Andri K. Rasyid</td>
+                    <td><code>rasyid@gudangdiesel.com</code></td>
+                    <td><code>password</code></td>
+                    <td>Operasional Staf</td>
+                </tr>
+                <tr>
+                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td>Shinta</td>
+                    <td><code>shinta@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
                     <td>Operasional Staf</td>
                 </tr>
