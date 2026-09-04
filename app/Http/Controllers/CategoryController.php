@@ -22,7 +22,7 @@ class CategoryController extends Controller
     public function index(): Response
     {
         try {
-            $categories = Category::withCount('items')->orderBy('name')->paginate(10);
+            $categories = Category::withCount('items')->orderBy('name')->paginate(10)->withQueryString();
 
             return Inertia::render('Categories/Index', [
                 'categories' => $categories,

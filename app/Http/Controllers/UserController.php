@@ -45,7 +45,7 @@ class UserController extends Controller
             return Inertia::render('Users/Index', [
                 'users' => User::whereHas('roles', function ($q) {
                     $q->where('name', 'admin');
-                })->with('roles')->paginate(10),
+                })->with('roles')->paginate(10)->withQueryString(),
                 'roles' => Role::where('name', 'admin')->get(['id', 'name']),
                 'filters' => [],
             ]);

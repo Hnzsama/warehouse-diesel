@@ -21,7 +21,7 @@ class UnitController extends Controller
     public function index(): Response
     {
         try {
-            $units = Unit::withCount('items')->orderBy('name')->paginate(10);
+            $units = Unit::withCount('items')->orderBy('name')->paginate(10)->withQueryString();
 
             return Inertia::render('Units/Index', [
                 'units' => $units,
