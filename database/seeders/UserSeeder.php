@@ -23,8 +23,18 @@ class UserSeeder extends Seeder
         );
         $pemilik->syncRoles(['pemilik']);
 
-        // 9 Admin Gudang (Sesuai 9 Peneliti di Tabel Skripsi)
-        $staffData = [
+        // Pemilik alias login
+        $pemilikAlias = User::firstOrCreate(
+            ['email' => 'pemilik@gudangdiesel.com'],
+            [
+                'name' => 'Steven Sanjaya (Owner)',
+                'password' => Hash::make('password'),
+            ]
+        );
+        $pemilikAlias->syncRoles(['pemilik']);
+
+        // 2 Admin Gudang Utama (Full Access)
+        $mainAdmins = [
             [
                 'email' => 'admin@gudangdiesel.com',
                 'name' => 'Bagus Miftah Nur Haqqi',
@@ -33,6 +43,21 @@ class UserSeeder extends Seeder
                 'email' => 'masgo@gudangdiesel.com',
                 'name' => 'Masgo',
             ],
+        ];
+
+        foreach ($mainAdmins as $info) {
+            $user = User::firstOrCreate(
+                ['email' => $info['email']],
+                [
+                    'name' => $info['name'],
+                    'password' => Hash::make('password'),
+                ]
+            );
+            $user->syncRoles(['admin']);
+        }
+
+        // 4 Staf Operasional Gudang (Pencatatan Barang Masuk & Keluar)
+        $opStaff = [
             [
                 'email' => 'ilyas@gudangdiesel.com',
                 'name' => 'Muhammad Herie Ilyas Asfari',
@@ -49,6 +74,21 @@ class UserSeeder extends Seeder
                 'email' => 'vito@gudangdiesel.com',
                 'name' => 'Muhammad Vito Arya Apriza',
             ],
+        ];
+
+        foreach ($opStaff as $info) {
+            $user = User::firstOrCreate(
+                ['email' => $info['email']],
+                [
+                    'name' => $info['name'],
+                    'password' => Hash::make('password'),
+                ]
+            );
+            $user->syncRoles(['staf_operasional']);
+        }
+
+        // 3 Admin QC & Stock Opname (Pemeriksa Stok & Barang Rusak)
+        $qcStaff = [
             [
                 'email' => 'revo@gudangdiesel.com',
                 'name' => 'Revo Mulia Alamsyah Harahap',
@@ -63,15 +103,15 @@ class UserSeeder extends Seeder
             ],
         ];
 
-        foreach ($staffData as $staffInfo) {
-            $staff = User::firstOrCreate(
-                ['email' => $staffInfo['email']],
+        foreach ($qcStaff as $info) {
+            $user = User::firstOrCreate(
+                ['email' => $info['email']],
                 [
-                    'name' => $staffInfo['name'],
+                    'name' => $info['name'],
                     'password' => Hash::make('password'),
                 ]
             );
-            $staff->syncRoles(['admin']);
+            $user->syncRoles(['admin_qc']);
         }
     }
 }

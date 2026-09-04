@@ -20,9 +20,9 @@ class UserController extends Controller
     public function index(Request $request): Response
     {
         try {
-            // Tampilkan hanya user admin saja (hilangkan email pemilik)
+            // Tampilkan user selain pemilik
             $query = User::whereHas('roles', function ($q) {
-                $q->where('name', 'admin');
+                $q->whereIn('name', ['admin', 'staf_operasional', 'admin_qc']);
             })->with('roles');
 
             if ($request->filled('search')) {
@@ -34,7 +34,7 @@ class UserController extends Controller
             }
 
             $users = $query->orderBy('name')->paginate(10)->withQueryString();
-            $roles = Role::where('name', 'admin')->get(['id', 'name']);
+            $roles = Role::whereIn('name', ['admin', 'staf_operasional', 'admin_qc'])->get(['id', 'name']);
 
             return Inertia::render('Users/Index', [
                 'users' => $users,
@@ -44,9 +44,9 @@ class UserController extends Controller
         } catch (\Throwable $e) {
             return Inertia::render('Users/Index', [
                 'users' => User::whereHas('roles', function ($q) {
-                    $q->where('name', 'admin');
+                    $q->whereIn('name', ['admin', 'staf_operasional', 'admin_qc']);
                 })->with('roles')->paginate(10)->withQueryString(),
-                'roles' => Role::where('name', 'admin')->get(['id', 'name']),
+                'roles' => Role::whereIn('name', ['admin', 'staf_operasional', 'admin_qc'])->get(['id', 'name']),
                 'filters' => [],
             ]);
         }
@@ -54,7 +54,6 @@ class UserController extends Controller
 
     /**
      * Store a newly created user in storage.
-     * Note: Creating a user via this module strictly assigns the 'admin' (Admin Gudang) role.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -62,7 +61,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'string', Password::defaults()],
-            'role' => 'required|string|in:admin',
+            'role' => 'required|string|in:admin,staf_operasional,admin_qc',
         ]);
 
         try {
@@ -73,10 +72,10 @@ class UserController extends Controller
                     'password' => Hash::make($validated['password']),
                 ]);
 
-                $user->assignRole('admin');
+                $user->assignRole($validated['role']);
             });
 
-            return redirect()->back()->with('success', "Pengguna {$validated['name']} berhasil ditambahkan sebagai Admin Gudang.");
+            return redirect()->back()->with('success', "Pengguna {$validated['name']} berhasil ditambahkan.");
         } catch (\Throwable $e) {
             return redirect()->back()->with('error', 'Gagal menambahkan pengguna baru: '.$e->getMessage());
         }
@@ -91,7 +90,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'password' => ['nullable', 'string', Password::defaults()],
-            'role' => 'required|string|in:admin',
+            'role' => 'required|string|in:admin,staf_operasional,admin_qc',
         ]);
 
         try {
@@ -104,7 +103,7 @@ class UserController extends Controller
                 }
 
                 $user->save();
-                $user->syncRoles(['admin']);
+                $user->syncRoles([$validated['role']]);
             });
 
             return redirect()->back()->with('success', "Data pengguna {$user->name} berhasil diperbarui.");

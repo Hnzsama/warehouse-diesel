@@ -27,6 +27,10 @@ class StockAdjustmentController extends Controller
 
         $query = StockAdjustment::with(['item.category', 'item.unit', 'user']);
 
+        if (! $request->user()->hasAnyRole(['admin', 'pemilik'])) {
+            $query->where('user_id', $request->user()->id);
+        }
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('reference_no', 'like', "%{$search}%")

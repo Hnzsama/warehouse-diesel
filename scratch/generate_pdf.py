@@ -150,6 +150,26 @@ html_content = """<!DOCTYPE html>
             border-radius: 3px;
         }
 
+        .tag-staf {
+            display: inline-block;
+            background-color: #e0e7ff;
+            color: #3730a3;
+            font-size: 8.5px;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+
+        .tag-qc {
+            display: inline-block;
+            background-color: #fae8ff;
+            color: #86198f;
+            font-size: 8.5px;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+
         .flow-container {
             display: flex;
             flex-direction: column;
@@ -320,67 +340,67 @@ html_content = """<!DOCTYPE html>
                     <td>Overview / Owner</td>
                 </tr>
                 <tr>
-                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td><span class="tag-admin">Admin Utama</span></td>
                     <td><strong>Bagus Miftah Nur Haqqi</strong></td>
                     <td><code>admin@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
-                    <td>Full Operasional</td>
+                    <td>Full System Access</td>
                 </tr>
                 <tr>
-                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td><span class="tag-admin">Admin Utama</span></td>
                     <td>Masgo</td>
                     <td><code>masgo@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
-                    <td>Operasional Staf</td>
+                    <td>Full System Access</td>
                 </tr>
                 <tr>
-                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td><span class="tag-staf">Staf Operasional</span></td>
                     <td>Muhammad Herie Ilyas Asfari</td>
                     <td><code>ilyas@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
-                    <td>Operasional Staf</td>
+                    <td>Catat Transaksi (Data Sendiri)</td>
                 </tr>
                 <tr>
-                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td><span class="tag-staf">Staf Operasional</span></td>
                     <td>Putri Nurkasih</td>
                     <td><code>putri@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
-                    <td>Operasional Staf</td>
+                    <td>Catat Transaksi (Data Sendiri)</td>
                 </tr>
                 <tr>
-                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td><span class="tag-staf">Staf Operasional</span></td>
                     <td>Saghifa Fitriana</td>
                     <td><code>saghifa@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
-                    <td>Operasional Staf</td>
+                    <td>Catat Transaksi (Data Sendiri)</td>
                 </tr>
                 <tr>
-                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td><span class="tag-staf">Staf Operasional</span></td>
                     <td>Muhammad Vito Arya Apriza</td>
                     <td><code>vito@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
-                    <td>Operasional Staf</td>
+                    <td>Catat Transaksi (Data Sendiri)</td>
                 </tr>
                 <tr>
-                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td><span class="tag-qc">Admin QC</span></td>
                     <td>Revo Mulia Alamsyah Harahap</td>
                     <td><code>revo@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
-                    <td>Operasional Staf</td>
+                    <td>Stok & Barang Rusak (Data Sendiri)</td>
                 </tr>
                 <tr>
-                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td><span class="tag-qc">Admin QC</span></td>
                     <td>Rum Mohamad Andri K. Rasyid</td>
                     <td><code>rasyid@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
-                    <td>Operasional Staf</td>
+                    <td>Stok & Barang Rusak (Data Sendiri)</td>
                 </tr>
                 <tr>
-                    <td><span class="tag-admin">Admin Gudang</span></td>
+                    <td><span class="tag-qc">Admin QC</span></td>
                     <td>Shinta</td>
                     <td><code>shinta@gudangdiesel.com</code></td>
                     <td><code>password</code></td>
-                    <td>Operasional Staf</td>
+                    <td>Stok & Barang Rusak (Data Sendiri)</td>
                 </tr>
             </tbody>
         </table>
@@ -408,7 +428,7 @@ html_content = """<!DOCTYPE html>
                 <tr>
                     <td><strong>Spatie RBAC</strong></td>
                     <td>Sistem Kartu Akses Ruangan Berdasarkan Peran</td>
-                    <td>Membagi hak akses pengguna menjadi Admin Gudang (Operator) dan Pemilik Gudang (Owner).</td>
+                    <td>Membagi hak akses menjadi Pemilik, Admin Utama, Staf Operasional, dan Admin QC.</td>
                 </tr>
                 <tr>
                     <td><strong>Session Stateful Auth</strong></td>
@@ -426,9 +446,9 @@ html_content = """<!DOCTYPE html>
                     <td>Stok bertambah otomatis saat <em>Barang Masuk</em> dan berkurang otomatis saat <em>Barang Keluar</em> tanpa kalkulator.</td>
                 </tr>
                 <tr>
-                    <td><strong>Proteksi Stok Minus</strong></td>
-                    <td>Sistem Pencegah Stok Teoritis Minus</td>
-                    <td>Menolak input <em>Barang Keluar</em> jika jumlah pengeluaran yang diminta melebihi sisa stok fisik di gudang.</td>
+                    <td><strong>Data Scoping (Data Privasi)</strong></td>
+                    <td>Batasan Tampilan Data Berdasarkan Pembuat</td>
+                    <td>Staf Operasional & Admin QC hanya menampilkan data transaksi/stok milik mereka sendiri, sedangkan Admin Utama & Pemilik dapat melihat seluruh data.</td>
                 </tr>
             </tbody>
         </table>
@@ -450,38 +470,33 @@ html_content = """<!DOCTYPE html>
             <tbody>
                 <tr>
                     <td><strong>Dashboard Monitoring & Area Chart</strong></td>
-                    <td><span class="tag-admin">Admin</span> <span class="tag-pemilik">Pemilik</span></td>
-                    <td>Melihat grafik & statistik real-time: Total Jenis Sparepart, Barang Masuk, Barang Keluar, Alert Stok Kritis, & Filter Periode.</td>
+                    <td><span class="tag-admin">Admin</span> <span class="tag-pemilik">Pemilik</span> <span class="tag-staf">Staf</span> <span class="tag-qc">QC</span></td>
+                    <td>Melihat grafik & statistik real-time (Total Sparepart, Barang Masuk, Barang Keluar, Alert Stok Kritis) sesuai batasan data masing-masing.</td>
                 </tr>
                 <tr>
-                    <td><strong>Master Data Sparepart</strong></td>
-                    <td><span class="tag-admin">Admin</span></td>
-                    <td>Kelola penuh (CRUD) suku cadang: kode barang, nama, kategori, satuan, stok awal, min_stock, & lokasi rak.</td>
+                    <td><strong>Master Data Sparepart, Kategori & Satuan</strong></td>
+                    <td><span class="tag-admin">Admin Utama</span></td>
+                    <td>Kelola penuh (CRUD) master suku cadang: kode barang, nama, kategori, satuan, stok awal, min_stock, & lokasi rak.</td>
                 </tr>
                 <tr>
-                    <td><strong>Kategori & Satuan</strong></td>
-                    <td><span class="tag-admin">Admin</span></td>
-                    <td>Pencatatan master kategori (Filter, Rem, Mesin) dan satuan ukuran (pcs, set, galon, unit).</td>
+                    <td><strong>Transaksi Barang Masuk & Keluar</strong></td>
+                    <td><span class="tag-admin">Admin Utama</span> <span class="tag-staf">Staf Operasional</span></td>
+                    <td>Input penerimaan & pengeluaran stok. Admin Utama & Pemilik melihat seluruh transaksi; Staf Operasional mencatat & hanya melihat transaksi milik sendiri.</td>
                 </tr>
                 <tr>
-                    <td><strong>Transaksi Barang Masuk</strong></td>
-                    <td><span class="tag-admin">Admin</span></td>
-                    <td>Input penerimaan pasokan dari supplier. Otomatis menambah jumlah sisa stok barang di rak.</td>
-                </tr>
-                <tr>
-                    <td><strong>Transaksi Barang Keluar</strong></td>
-                    <td><span class="tag-admin">Admin</span></td>
-                    <td>Input pengeluaran sparepart untuk armada truk. Otomatis memotong sisa stok dengan validasi stok mencukupi.</td>
+                    <td><strong>Penyesuaian Stok & Cek Barang Rusak</strong></td>
+                    <td><span class="tag-admin">Admin Utama</span> <span class="tag-qc">Admin QC</span></td>
+                    <td>Input stock opname & barang rusak/hilang. Admin QC mencatat penyesuaian & hanya melihat data penyesuaian milik sendiri.</td>
                 </tr>
                 <tr>
                     <td><strong>Laporan Persediaan, PDF & Excel</strong></td>
-                    <td><span class="tag-admin">Admin</span> <span class="tag-pemilik">Pemilik</span></td>
+                    <td><span class="tag-admin">Admin Utama</span> <span class="tag-pemilik">Pemilik</span></td>
                     <td>Rekapitulasi stok akhir, barang masuk, & keluar dengan filter rentang tanggal serta cetak PDF & Export Excel + Chart.</td>
                 </tr>
                 <tr>
-                    <td><strong>Kelola Admin Gudang</strong></td>
-                    <td><span class="tag-admin">Admin</span> <span class="tag-pemilik">Pemilik</span></td>
-                    <td>Manajemen akun staf Admin Gudang (tambah, edit, hapus). Akun Pemilik disembunyikan dari daftar demi keamanan.</td>
+                    <td><strong>Kelola Pengguna Sistem</strong></td>
+                    <td><span class="tag-admin">Admin Utama</span> <span class="tag-pemilik">Pemilik</span></td>
+                    <td>Manajemen akun staf (Admin Utama, Staf Operasional, Admin QC). Akun Pemilik disembunyikan dari daftar demi keamanan.</td>
                 </tr>
             </tbody>
         </table>
