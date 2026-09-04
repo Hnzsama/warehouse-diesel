@@ -13,49 +13,65 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1 Owner (Pemilik Gudang)
+        // 1 Pemilik Gudang (Sesuai Skripsi)
         $pemilik = User::firstOrCreate(
-            ['email' => 'pemilik@gudangdiesel.com'],
+            ['email' => 'steven.owner@gudangdiesel.com'],
             [
-                'name' => 'Bapak Hartono (Pemilik Gudang)',
+                'name' => 'Steven Sanjaya',
                 'password' => Hash::make('password'),
             ]
         );
         $pemilik->syncRoles(['pemilik']);
 
-        // 5 Admin Gudang
-        $adminsData = [
+        // 9 Admin Gudang (Sesuai 9 Peneliti di Tabel Skripsi)
+        $staffData = [
             [
                 'email' => 'admin@gudangdiesel.com',
-                'name' => 'Admin Gudang Utama',
+                'name' => 'Bagus Miftah Nur Haqqi',
             ],
             [
-                'email' => 'budi.admin@gudangdiesel.com',
-                'name' => 'Budi Santoso (Admin Shift Pagi)',
+                'email' => 'masgo@gudangdiesel.com',
+                'name' => 'Masgo',
             ],
             [
-                'email' => 'agus.admin@gudangdiesel.com',
-                'name' => 'Agus Setiawan (Admin Shift Siang)',
+                'email' => 'ilyas@gudangdiesel.com',
+                'name' => 'Muhammad Herie Ilyas Asfari',
             ],
             [
-                'email' => 'rudi.admin@gudangdiesel.com',
-                'name' => 'Rudi Hermawan (Admin Stock Opname)',
+                'email' => 'putri@gudangdiesel.com',
+                'name' => 'Putri Nurkasih',
             ],
             [
-                'email' => 'dewi.admin@gudangdiesel.com',
-                'name' => 'Dewi Lestari (Admin Logistik)',
+                'email' => 'saghifa@gudangdiesel.com',
+                'name' => 'Saghifa Fitriana',
+            ],
+            [
+                'email' => 'vito@gudangdiesel.com',
+                'name' => 'Muhammad Vito Arya Apriza',
+            ],
+            [
+                'email' => 'revo@gudangdiesel.com',
+                'name' => 'Revo Mulia Alamsyah Harahap',
+            ],
+            [
+                'email' => 'rasyid@gudangdiesel.com',
+                'name' => 'Rum Mohamad Andri K. Rasyid',
+            ],
+            [
+                'email' => 'shinta@gudangdiesel.com',
+                'name' => 'Shinta',
             ],
         ];
 
-        foreach ($adminsData as $adminInfo) {
-            $admin = User::firstOrCreate(
-                ['email' => $adminInfo['email']],
+        foreach ($staffData as $staffInfo) {
+            $staff = User::firstOrCreate(
+                ['email' => $staffInfo['email']],
                 [
-                    'name' => $adminInfo['name'],
+                    'name' => $staffInfo['name'],
                     'password' => Hash::make('password'),
                 ]
             );
-            $admin->syncRoles(['admin']);
+            $staff->syncRoles(['admin']);
         }
     }
 }
