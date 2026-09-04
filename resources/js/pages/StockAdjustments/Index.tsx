@@ -34,6 +34,7 @@ type Item = {
     item_code: string;
     name: string;
     stock: number;
+    deleted_at?: string | null;
     unit?: { short_name: string };
 };
 
@@ -355,7 +356,15 @@ export default function StockAdjustmentsIndex({ adjustments, items, autoRef, use
                                                     <td className="px-4 py-3.5 font-mono font-bold">{adj.reference_no}</td>
                                                     <td className="px-4 py-3.5 font-medium whitespace-nowrap text-xs text-muted-foreground">{formatDateWithTime(adj.date)}</td>
                                                     <td className="px-4 py-3.5 font-medium">
-                                                        {adj.item?.name} <span className="text-xs text-muted-foreground font-mono">({adj.item?.item_code})</span>
+                                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                                            <span>{adj.item?.name || 'Item Terhapus'}</span>
+                                                            <span className="text-xs text-muted-foreground font-mono">({adj.item?.item_code || '-'})</span>
+                                                            {adj.item?.deleted_at && (
+                                                                <Badge variant="outline" className="border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 text-[10px] px-1.5 py-0 font-normal">
+                                                                    Item Terhapus
+                                                                </Badge>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="px-4 py-3.5 text-center whitespace-nowrap">
                                                         {isAdd ? (

@@ -252,7 +252,10 @@ export default function ReportsIndex({ reportType, period = 'monthly', startDate
                                                 <td className="px-4 py-3 text-xs text-muted-foreground">{i + 1}</td>
                                                 <td className="px-4 py-3 font-mono font-bold">{tx.reference_no}</td>
                                                 <td className="px-4 py-3 font-medium whitespace-nowrap">{formatDate(tx.date)}</td>
-                                                <td className="px-4 py-3 font-medium">{tx.item?.name}</td>
+                                                <td className="px-4 py-3 font-medium">
+                                                    {tx.item?.name || 'Item Terhapus'}
+                                                    {tx.item?.deleted_at && <span className="ml-1.5 text-xs text-red-500 font-normal">(Item Terhapus)</span>}
+                                                </td>
                                                 <td className="px-4 py-3 text-center font-bold text-emerald-500 dark:text-emerald-400 whitespace-nowrap">+{tx.quantity} {tx.item?.unit?.short_name}</td>
                                                 <td className="px-4 py-3 text-muted-foreground">
                                                     {typeof tx.supplier === 'object' && tx.supplier ? tx.supplier.name : (tx.supplier || '-')}
@@ -286,7 +289,10 @@ export default function ReportsIndex({ reportType, period = 'monthly', startDate
                                                 <td className="px-4 py-3 text-xs text-muted-foreground">{i + 1}</td>
                                                 <td className="px-4 py-3 font-mono font-bold">{tx.reference_no}</td>
                                                 <td className="px-4 py-3 font-medium whitespace-nowrap">{formatDate(tx.date)}</td>
-                                                <td className="px-4 py-3 font-medium">{tx.item?.name}</td>
+                                                <td className="px-4 py-3 font-medium">
+                                                    {tx.item?.name || 'Item Terhapus'}
+                                                    {tx.item?.deleted_at && <span className="ml-1.5 text-xs text-red-500 font-normal">(Item Terhapus)</span>}
+                                                </td>
                                                 <td className="px-4 py-3 text-center font-bold text-amber-500 dark:text-amber-400 whitespace-nowrap">-{tx.quantity} {tx.item?.unit?.short_name}</td>
                                                 <td className="px-4 py-3 text-muted-foreground">{tx.recipient || '-'}</td>
                                                 <td className="px-4 py-3 text-xs text-muted-foreground">{tx.user?.name}</td>

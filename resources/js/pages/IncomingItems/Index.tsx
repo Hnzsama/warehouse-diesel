@@ -39,6 +39,7 @@ type Item = {
     item_code: string;
     name: string;
     stock: number;
+    deleted_at?: string | null;
     unit?: { short_name: string };
 };
 
@@ -391,7 +392,15 @@ export default function IncomingItemsIndex({ incomingItems, items, suppliers = [
                                                     <td className="px-4 py-3.5 font-mono font-bold group-hover:text-primary transition-colors">{tx.reference_no}</td>
                                                     <td className="px-4 py-3.5 font-medium whitespace-nowrap text-xs text-muted-foreground">{formatDateWithTime(tx.date)}</td>
                                                     <td className="px-4 py-3.5 font-medium">
-                                                        {tx.item?.name} <span className="text-xs text-muted-foreground font-mono">({tx.item?.item_code})</span>
+                                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                                            <span>{tx.item?.name || 'Item Terhapus'}</span>
+                                                            <span className="text-xs text-muted-foreground font-mono">({tx.item?.item_code || '-'})</span>
+                                                            {tx.item?.deleted_at && (
+                                                                <Badge variant="outline" className="border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 text-[10px] px-1.5 py-0 font-normal">
+                                                                    Item Terhapus
+                                                                </Badge>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="px-4 py-3.5 text-center whitespace-nowrap">
                                                         <Badge variant="outline" className="font-bold bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border-emerald-500/20">
