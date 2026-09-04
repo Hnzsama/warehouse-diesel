@@ -242,7 +242,7 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                         </Button>
                         <Button
                             variant="outline"
-                            onClick={() => window.print()}
+                            onClick={() => window.open('/reports/print?report_type=stock', '_blank')}
                             className="gap-2 cursor-pointer border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200"
                         >
                             <Printer className="h-4 w-4" />
