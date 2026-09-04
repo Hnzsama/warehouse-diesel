@@ -2,8 +2,12 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import {
     AlertTriangle,
     CheckCircle2,
+    Eye,
+    FileSpreadsheet,
     Filter,
+    Pencil,
     Plus,
+    Printer,
     Search,
     Trash2,
     X,
@@ -87,6 +91,7 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
     const { flash } = usePage<SharedData>().props;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<Item | null>(null);
+    const [viewingItem, setViewingItem] = useState<Item | null>(null);
 
     const [search, setSearch] = useState(filters.search || '');
     const [categoryId, setCategoryId] = useState(filters.category_id || '');
@@ -99,7 +104,7 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
         category_id: '',
         unit_id: '',
         stock: 0,
-        min_stock: 5,
+        min_stock: 0,
         rack_location: '',
     });
 
@@ -161,6 +166,30 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
         }
     };
 
+    const handleExportExcel = () => {
+        const headers = ['Kode Barang', 'Nama Sparepart', 'Kategori', 'Satuan', 'Stok Available', 'Stok Minimum', 'Lokasi Rak'];
+        const csvRows = [
+            headers.join(','),
+            ...items.data.map((item) => [
+                `"${item.item_code}"`,
+                `"${item.name.replace(/"/g, '""')}"`,
+                `"${item.category?.name || '-'}"`,
+                `"${item.unit?.name || '-'}"`,
+                item.stock,
+                item.min_stock,
+                `"${item.rack_location || '-'}"`,
+            ].join(',')),
+        ];
+        const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `Master_Data_Sparepart_${new Date().toISOString().slice(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <>
             <Head title="Master Sparepart Diesel Truk" />
@@ -187,14 +216,32 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                             Master Data Sparepart
                         </h1>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                            Kelola suku cadang diesel, kategori, dan lokasi rak. Klik baris untuk mengedit data.
+                            Kelola suku cadang diesel, kategori, dan lokasi rak. Klik baris untuk melihat detail atau mengedit.
                         </p>
                     </div>
 
-                    <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
-                        <Plus className="h-4 w-4" />
-                        <span>Tambah Sparepart Baru</span>
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                        <Button
+                            variant="outline"
+                            onClick={handleExportExcel}
+                            className="gap-2 cursor-pointer border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
+                        >
+                            <FileSpreadsheet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                            <span>Export Excel</span>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => window.print()}
+                            className="gap-2 cursor-pointer border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                        >
+                            <Printer className="h-4 w-4" />
+                            <span>Cetak / PDF</span>
+                        </Button>
+                        <Button onClick={openCreateModal} className="gap-2 shadow-sm cursor-pointer justify-center">
+                            <Plus className="h-4 w-4" />
+                            <span>Tambah Sparepart Baru</span>
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Filter Bar */}
@@ -271,7 +318,7 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                                         <TableHead className="text-center">Stok Available</TableHead>
                                         <TableHead className="text-center">Stok Minimum</TableHead>
                                         <TableHead>Lokasi Rak</TableHead>
-                                        <TableHead className="text-center w-[60px]">Hapus</TableHead>
+                                        <TableHead className="text-center w-[120px]">Aksi</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -287,9 +334,9 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                                             return (
                                                 <TableRow
                                                     key={item.id}
-                                                    onClick={() => openEditModal(item)}
+                                                    onClick={() => setViewingItem(item)}
                                                     className="cursor-pointer hover:bg-muted/70 transition-colors group"
-                                                    title="Klik untuk mengedit sparepart ini"
+                                                    title="Klik untuk melihat rincian suku cadang"
                                                 >
                                                     <TableCell className="font-mono font-bold group-hover:text-primary transition-colors">{item.item_code}</TableCell>
                                                     <TableCell className="font-medium">{item.name}</TableCell>
@@ -310,15 +357,35 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                                                     </TableCell>
                                                     <TableCell className="text-muted-foreground">{item.rack_location || '-'}</TableCell>
                                                     <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => handleDelete(item)}
-                                                            className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                            title="Hapus Sparepart"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
+                                                        <div className="flex items-center justify-center gap-1">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => setViewingItem(item)}
+                                                                className="h-8 w-8 text-blue-500 hover:bg-blue-500/15 cursor-pointer"
+                                                                title="Lihat Detail Sparepart"
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => openEditModal(item)}
+                                                                className="h-8 w-8 text-amber-500 hover:bg-amber-500/15 cursor-pointer"
+                                                                title="Edit Data Sparepart"
+                                                            >
+                                                                <Pencil className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => handleDelete(item)}
+                                                                className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                                title="Hapus Sparepart"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
                                                     </TableCell>
                                                 </TableRow>
                                             );
@@ -455,6 +522,78 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                             </Button>
                         </div>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal Detail View Sparepart */}
+            <Dialog open={!!viewingItem} onOpenChange={() => setViewingItem(null)}>
+                <DialogContent className="sm:max-w-md max-w-[95vw] rounded-lg">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg text-primary font-bold">
+                            <Eye className="h-5 w-5" />
+                            <span>Rincian Suku Cadang</span>
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    {viewingItem && (
+                        <div className="space-y-4 pt-2 text-sm">
+                            <div className="grid grid-cols-2 gap-3 bg-muted/50 p-3 rounded-lg border border-border">
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Kode Sparepart</span>
+                                    <span className="font-mono font-bold text-foreground">{viewingItem.item_code}</span>
+                                </div>
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Nama Sparepart</span>
+                                    <span className="font-bold text-foreground">{viewingItem.name}</span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Kategori</span>
+                                    <span className="font-medium">{viewingItem.category?.name || '-'}</span>
+                                </div>
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Satuan</span>
+                                    <span className="font-medium">{viewingItem.unit?.name} ({viewingItem.unit?.short_name})</span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 bg-card p-3 rounded-lg border border-border">
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Stok Tersedia</span>
+                                    <div className="mt-0.5">
+                                        {viewingItem.stock <= viewingItem.min_stock ? (
+                                            <Badge variant="destructive" className="font-bold bg-red-600 text-white">
+                                                {viewingItem.stock} {viewingItem.unit?.short_name} (Kritis)
+                                            </Badge>
+                                        ) : (
+                                            <Badge variant="outline" className="font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                                                {viewingItem.stock} {viewingItem.unit?.short_name}
+                                            </Badge>
+                                        )}
+                                    </div>
+                                </div>
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Stok Minimum</span>
+                                    <span className="font-semibold text-foreground">{viewingItem.min_stock} {viewingItem.unit?.short_name}</span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Lokasi Rak</span>
+                                    <span className="font-semibold text-foreground">{viewingItem.rack_location || 'Belum diatur'}</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-end pt-3 border-t border-border">
+                                <Button type="button" variant="secondary" onClick={() => setViewingItem(null)} className="cursor-pointer">
+                                    Tutup
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
         </>
