@@ -400,21 +400,22 @@ export default function OutgoingItemsIndex({ outgoingItems, items, suppliers = [
                             />
 
                             <div className="w-full">
-                                <select
+                                <Combobox
+                                    options={[
+                                        { value: '', label: '-- Semua Operator --' },
+                                        ...users.map((u) => {
+                                            const roleLabel = getUserRoleLabel(u);
+                                            return {
+                                                value: String(u.id),
+                                                label: `${formatShortName(u.name)} ${roleLabel ? `(${roleLabel})` : ''}`,
+                                            };
+                                        }),
+                                    ]}
                                     value={userId}
-                                    onChange={(e) => setUserId(e.target.value)}
-                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
-                                >
-                                    <option value="">-- Semua Operator --</option>
-                                    {users.map((u) => {
-                                        const roleLabel = getUserRoleLabel(u);
-                                        return (
-                                            <option key={u.id} value={u.id}>
-                                                {formatShortName(u.name)} {roleLabel ? `(${roleLabel})` : ''}
-                                            </option>
-                                        );
-                                    })}
-                                </select>
+                                    onValueChange={(val) => setUserId(val)}
+                                    placeholder="-- Semua Operator --"
+                                    searchPlaceholder="Cari nama operator..."
+                                />
                             </div>
 
                             <Button type="submit" variant="secondary" className="gap-1.5 cursor-pointer justify-center">
