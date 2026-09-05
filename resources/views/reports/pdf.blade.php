@@ -44,12 +44,37 @@
             color: #64748b;
             margin-top: 3px;
         }
+        .kpi-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        .kpi-card {
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 8px 12px;
+            text-align: center;
+        }
+        .kpi-label {
+            font-size: 7.5pt;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .kpi-value {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #0f172a;
+            margin-top: 2px;
+        }
         .meta-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
             border-radius: 4px;
         }
         .meta-table td {
@@ -57,9 +82,9 @@
             font-size: 8.5pt;
         }
         .meta-label {
-            color: #64748b;
+            color: #475569;
             font-weight: bold;
-            width: 15%;
+            width: 18%;
         }
         .meta-value {
             color: #0f172a;
@@ -71,13 +96,13 @@
             margin-bottom: 15px;
         }
         .data-table th {
-            background-color: #1e293b;
+            background-color: #0f172a;
             color: #ffffff;
             font-weight: bold;
             font-size: 8.5pt;
             text-transform: uppercase;
             padding: 7px 8px;
-            border: 1px solid #1e293b;
+            border: 1px solid #0f172a;
             text-align: left;
         }
         .data-table td {
@@ -171,6 +196,57 @@
             <td class="meta-value">{{ $reportTitle }}</td>
             <td class="meta-label">Periode Filter:</td>
             <td class="meta-value">{{ $periodLabel }} ({{ $startDate }} s/d {{ $endDate }})</td>
+        </tr>
+    </table>
+
+    <table class="kpi-table">
+        <tr>
+            @if ($reportType === 'stock')
+                <td style="width: 33.3%; padding-right: 5px;">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Jenis Sparepart</div>
+                        <div class="kpi-value">{{ count($reportData) }} Item</div>
+                    </div>
+                </td>
+                <td style="width: 33.3%; padding-left: 5px; padding-right: 5px;">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Sisa Stok Gudang</div>
+                        <div class="kpi-value">{{ collect($reportData)->sum('stock') }} Unit</div>
+                    </div>
+                </td>
+                <td style="width: 33.3%; padding-left: 5px;">
+                    <div class="kpi-card" style="border-color: #fecaca; background-color: #fef2f2;">
+                        <div class="kpi-label" style="color: #dc2626;">Stok Kritis / Minim</div>
+                        <div class="kpi-value" style="color: #dc2626;">{{ collect($reportData)->filter(fn($i) => $i->stock <= $i->min_stock)->count() }} Item</div>
+                    </div>
+                </td>
+            @elseif ($reportType === 'incoming')
+                <td style="width: 50%; padding-right: 5px;">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Transaksi Masuk</div>
+                        <div class="kpi-value">{{ count($reportData) }} Transaksi</div>
+                    </div>
+                </td>
+                <td style="width: 50%; padding-left: 5px;">
+                    <div class="kpi-card" style="border-color: #bbf7d0; background-color: #f0fdf4;">
+                        <div class="kpi-label" style="color: #16a34a;">Total Barang Masuk</div>
+                        <div class="kpi-value" style="color: #16a34a;">+{{ collect($reportData)->sum('quantity') }} Qty</div>
+                    </div>
+                </td>
+            @elseif ($reportType === 'outgoing')
+                <td style="width: 50%; padding-right: 5px;">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Transaksi Keluar</div>
+                        <div class="kpi-value">{{ count($reportData) }} Transaksi</div>
+                    </div>
+                </td>
+                <td style="width: 50%; padding-left: 5px;">
+                    <div class="kpi-card" style="border-color: #fde68a; background-color: #fffbeb;">
+                        <div class="kpi-label" style="color: #d97706;">Total Barang Keluar</div>
+                        <div class="kpi-value" style="color: #d97706;">-{{ collect($reportData)->sum('quantity') }} Qty</div>
+                    </div>
+                </td>
+            @endif
         </tr>
     </table>
 

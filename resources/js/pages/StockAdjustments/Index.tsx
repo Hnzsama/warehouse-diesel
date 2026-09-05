@@ -1,6 +1,7 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, Filter, PackageCheck, Plus, RefreshCw, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import Pagination from '@/components/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { SharedData } from '@/types/auth';
 import type { BreadcrumbItem } from '@/types';
 
@@ -184,6 +191,21 @@ export default function StockAdjustmentsIndex({ adjustments, items, autoRef, use
     const [endDate, setEndDate] = useState(filters.end_date || '');
     const [userId, setUserId] = useState(filters.user_id || '');
 
+    const [confirmState, setConfirmState] = useState<{
+        open: boolean;
+        title: string;
+        description: string;
+        confirmText?: string;
+        variant?: 'destructive' | 'warning' | 'default' | 'emerald';
+        icon?: 'archive' | 'trash' | 'warning' | 'restore';
+        onConfirm: () => void;
+    }>({
+        open: false,
+        title: '',
+        description: '',
+        onConfirm: () => {},
+    });
+
     const { data, setData, post, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         reference_no: autoRef,
         item_id: '',
@@ -228,13 +250,23 @@ export default function StockAdjustmentsIndex({ adjustments, items, autoRef, use
     };
 
     const handleDelete = (adj: StockAdjustment) => {
-        if (confirm(`Apakah Anda yakin ingin membatalkan penyesuaian stok "${adj.reference_no}"?\nStok barang akan dikembalikan ke kondisi sebelumnya.`)) {
-            destroy(`/stock-adjustments/${adj.id}`);
-        }
+        setConfirmState({
+            open: true,
+            title: 'Batalkan Penyesuaian Stok',
+            description: `Apakah Anda yakin ingin membatalkan penyesuaian stok "${adj.reference_no}"? Stok barang akan dikembalikan ke kondisi sebelumnya.`,
+            confirmText: 'Batalkan Penyesuaian',
+            variant: 'warning',
+            icon: 'warning',
+            onConfirm: () => {
+                destroy(`/stock-adjustments/${adj.id}`, {
+                    onSuccess: () => setConfirmState((prev) => ({ ...prev, open: false })),
+                });
+            },
+        });
     };
 
     return (
-        <>
+        <TooltipProvider>
             <Head title="Penyesuaian Stok (Opname)" />
 
             <div className="flex flex-1 flex-col gap-5 p-3 sm:p-4 md:p-6 w-full max-w-full overflow-hidden">
@@ -394,15 +426,21 @@ export default function StockAdjustmentsIndex({ adjustments, items, autoRef, use
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-3.5 text-center">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => handleDelete(adj)}
-                                                            className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                            title="Batalkan Penyesuaian Stok"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => handleDelete(adj)}
+                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Batalkan Penyesuaian Stok</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
                                                     </td>
                                                 </tr>
                                             );
@@ -544,7 +582,18 @@ export default function StockAdjustmentsIndex({ adjustments, items, autoRef, use
                     </form>
                 </DialogContent>
             </Dialog>
-        </>
+
+            <ConfirmDialog
+                open={confirmState.open}
+                onOpenChange={(open) => setConfirmState((prev) => ({ ...prev, open }))}
+                title={confirmState.title}
+                description={confirmState.description}
+                confirmText={confirmState.confirmText}
+                variant={confirmState.variant}
+                icon={confirmState.icon}
+                onConfirm={confirmState.onConfirm}
+            />
+        </TooltipProvider>
     );
 }
 

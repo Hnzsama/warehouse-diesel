@@ -11,6 +11,7 @@ import {
     UserPlus,
 } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import Pagination from '@/components/pagination';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +40,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useInitials } from '@/hooks/use-initials';
 import type { SharedData } from '@/types/auth';
 import type { BreadcrumbItem } from '@/types';
@@ -135,6 +142,21 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
     const [roleFilter, setRoleFilter] = useState(filters.role || '');
 
+    const [confirmState, setConfirmState] = useState<{
+        open: boolean;
+        title: string;
+        description: string;
+        confirmText?: string;
+        variant?: 'destructive' | 'warning' | 'default' | 'emerald';
+        icon?: 'archive' | 'trash' | 'warning' | 'restore';
+        onConfirm: () => void;
+    }>({
+        open: false,
+        title: '',
+        description: '',
+        onConfirm: () => {},
+    });
+
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         name: '',
         email: '',
@@ -150,12 +172,6 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
     const openCreateModal = () => {
         setEditingUser(null);
         reset();
-        setData({
-            name: '',
-            email: '',
-            password: '',
-            role: 'staf_operasional',
-        });
         clearErrors();
         setIsModalOpen(true);
     };
@@ -188,16 +204,33 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
 
     const handleDelete = (u: UserItem) => {
         if (u.id === currentUser.id) {
-            alert('Anda tidak bisa menghapus akun Anda sendiri.');
+            setConfirmState({
+                open: true,
+                title: 'Tindakan Tidak Diizinkan',
+                description: 'Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif digunakan.',
+                confirmText: 'Mengerti',
+                variant: 'default',
+                onConfirm: () => setConfirmState((prev) => ({ ...prev, open: false })),
+            });
             return;
         }
-        if (confirm(`Apakah Anda yakin ingin menghapus akses pengguna "${u.name}"?`)) {
-            destroy(`/users/${u.id}`);
-        }
+        setConfirmState({
+            open: true,
+            title: 'Hapus Akses Pengguna',
+            description: `Apakah Anda yakin ingin menghapus akses pengguna "${u.name}"? Pengguna ini tidak akan dapat login kembali.`,
+            confirmText: 'Hapus Pengguna',
+            variant: 'destructive',
+            icon: 'trash',
+            onConfirm: () => {
+                destroy(`/users/${u.id}`, {
+                    onSuccess: () => setConfirmState((prev) => ({ ...prev, open: false })),
+                });
+            },
+        });
     };
 
     return (
-        <>
+        <TooltipProvider>
             <Head title="Manajemen Pengguna & Staf Gudang" />
 
             <div className="flex flex-1 flex-col gap-5 p-3 sm:p-4 md:p-6 w-full max-w-full overflow-hidden">
@@ -324,15 +357,21 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                                                     </TableCell>
                                                     <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
                                                         {!isSelf ? (
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => handleDelete(u)}
-                                                                className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                                title="Hapus Akses Pengguna"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => handleDelete(u)}
+                                                                        className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>Hapus Akses Pengguna</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
                                                         ) : (
                                                             <span className="text-xs text-muted-foreground">-</span>
                                                         )}
@@ -428,7 +467,18 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                     </form>
                 </DialogContent>
             </Dialog>
-        </>
+
+            <ConfirmDialog
+                open={confirmState.open}
+                onOpenChange={(open) => setConfirmState((prev) => ({ ...prev, open }))}
+                title={confirmState.title}
+                description={confirmState.description}
+                confirmText={confirmState.confirmText}
+                variant={confirmState.variant}
+                icon={confirmState.icon}
+                onConfirm={confirmState.onConfirm}
+            />
+        </TooltipProvider>
     );
 }
 

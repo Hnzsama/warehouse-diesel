@@ -1,6 +1,7 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { AlertTriangle, CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import Pagination from '@/components/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { SharedData } from '@/types/auth';
 import type { BreadcrumbItem } from '@/types';
 
@@ -52,6 +59,21 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
     const { flash } = usePage<SharedData>().props;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+
+    const [confirmState, setConfirmState] = useState<{
+        open: boolean;
+        title: string;
+        description: string;
+        confirmText?: string;
+        variant?: 'destructive' | 'warning' | 'default' | 'emerald';
+        icon?: 'archive' | 'trash' | 'warning' | 'restore';
+        onConfirm: () => void;
+    }>({
+        open: false,
+        title: '',
+        description: '',
+        onConfirm: () => {},
+    });
 
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         name: '',
@@ -85,13 +107,23 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
     };
 
     const handleDelete = (category: Category) => {
-        if (confirm(`Apakah Anda yakin ingin menghapus kategori "${category.name}"?`)) {
-            destroy(`/categories/${category.id}`);
-        }
+        setConfirmState({
+            open: true,
+            title: 'Hapus Kategori Sparepart',
+            description: `Apakah Anda yakin ingin menghapus kategori "${category.name}"?`,
+            confirmText: 'Hapus Kategori',
+            variant: 'destructive',
+            icon: 'trash',
+            onConfirm: () => {
+                destroy(`/categories/${category.id}`, {
+                    onSuccess: () => setConfirmState((prev) => ({ ...prev, open: false })),
+                });
+            },
+        });
     };
 
     return (
-        <>
+        <TooltipProvider>
             <Head title="Kategori Sparepart Diesel" />
 
             <div className="flex flex-1 flex-col gap-5 p-3 sm:p-4 md:p-6 w-full max-w-full overflow-hidden">
@@ -162,15 +194,21 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => handleDelete(cat)}
-                                                        className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                        title="Hapus Kategori"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => handleDelete(cat)}
+                                                                className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>Hapus Kategori</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
                                                 </TableCell>
                                             </TableRow>
                                         ))
@@ -215,7 +253,18 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                     </form>
                 </DialogContent>
             </Dialog>
-        </>
+
+            <ConfirmDialog
+                open={confirmState.open}
+                onOpenChange={(open) => setConfirmState((prev) => ({ ...prev, open }))}
+                title={confirmState.title}
+                description={confirmState.description}
+                confirmText={confirmState.confirmText}
+                variant={confirmState.variant}
+                icon={confirmState.icon}
+                onConfirm={confirmState.onConfirm}
+            />
+        </TooltipProvider>
     );
 }
 

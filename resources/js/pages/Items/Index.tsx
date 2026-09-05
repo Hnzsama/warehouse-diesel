@@ -1,6 +1,7 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import {
     AlertTriangle,
+    Archive,
     CheckCircle2,
     Eye,
     FileSpreadsheet,
@@ -10,10 +11,10 @@ import {
     Printer,
     RotateCcw,
     Search,
-    Trash2,
     X,
 } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import Pagination from '@/components/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { SharedData } from '@/types/auth';
 import type { BreadcrumbItem } from '@/types';
 
@@ -165,40 +172,55 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
         }
     };
 
+    const [confirmState, setConfirmState] = useState<{
+        open: boolean;
+        title: string;
+        description: string;
+        confirmText?: string;
+        variant?: 'destructive' | 'warning' | 'default' | 'emerald';
+        icon?: 'archive' | 'trash' | 'warning' | 'restore';
+        onConfirm: () => void;
+    }>({
+        open: false,
+        title: '',
+        description: '',
+        onConfirm: () => {},
+    });
+
     const handleDelete = (item: Item) => {
-        if (confirm(`Apakah Anda yakin ingin menyembunyikan/menghapus (Soft Delete) sparepart "${item.name}"? Data riwayat transaksi tetap tersimpan aman.`)) {
-            destroy(`/items/${item.id}`);
-        }
+        setConfirmState({
+            open: true,
+            title: 'Arsipkan Suku Cadang (Soft Delete)',
+            description: `Apakah Anda yakin ingin mengarsipkan suku cadang "${item.name}"? Data barang akan disembunyikan dari daftar utama namun riwayat transaksi tetap tersimpan aman.`,
+            confirmText: 'Arsipkan Barang',
+            variant: 'warning',
+            icon: 'archive',
+            onConfirm: () => {
+                destroy(`/items/${item.id}`, {
+                    onSuccess: () => setConfirmState((prev) => ({ ...prev, open: false })),
+                });
+            },
+        });
     };
 
     const handleRestore = (item: Item) => {
-        if (confirm(`Apakah Anda yakin ingin memulihkan kembali sparepart "${item.name}"?`)) {
-            router.post(`/items/${item.id}/restore`);
-        }
+        setConfirmState({
+            open: true,
+            title: 'Pulihkan Suku Cadang',
+            description: `Apakah Anda yakin ingin memulihkan kembali suku cadang "${item.name}" ke daftar aktif?`,
+            confirmText: 'Pulihkan Barang',
+            variant: 'emerald',
+            icon: 'restore',
+            onConfirm: () => {
+                router.post(`/items/${item.id}/restore`, {}, {
+                    onSuccess: () => setConfirmState((prev) => ({ ...prev, open: false })),
+                });
+            },
+        });
     };
 
     const handleExportExcel = () => {
-        const headers = ['Kode Barang', 'Nama Sparepart', 'Kategori', 'Satuan', 'Stok Available', 'Stok Minimum', 'Lokasi Rak'];
-        const csvRows = [
-            headers.join(','),
-            ...items.data.map((item) => [
-                `"${item.item_code}"`,
-                `"${item.name.replace(/"/g, '""')}"`,
-                `"${item.category?.name || '-'}"`,
-                `"${item.unit?.name || '-'}"`,
-                item.stock,
-                item.min_stock,
-                `"${item.rack_location || '-'}"`,
-            ].join(',')),
-        ];
-        const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `Master_Data_Sparepart_${new Date().toISOString().slice(0, 10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        window.open('/reports/export-excel?report_type=stock', '_blank');
     };
 
     return (
@@ -242,7 +264,7 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                         </Button>
                         <Button
                             variant="outline"
-                            onClick={() => window.open('/reports/print?report_type=stock', '_blank')}
+                            onClick={() => window.open('/reports/export-pdf?report_type=stock', '_blank')}
                             className="gap-2 cursor-pointer border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200"
                         >
                             <Printer className="h-4 w-4" />
@@ -387,49 +409,69 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                                                     </TableCell>
                                                     <TableCell className="text-muted-foreground">{item.rack_location || '-'}</TableCell>
                                                     <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                        <div className="flex items-center justify-center gap-1">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => setViewingItem(item)}
-                                                                className="h-8 w-8 text-blue-500 hover:bg-blue-500/15 cursor-pointer"
-                                                                title="Lihat Detail Sparepart"
-                                                            >
-                                                                <Eye className="h-4 w-4" />
-                                                            </Button>
-                                                            {!isTrashed && (
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    onClick={() => openEditModal(item)}
-                                                                    className="h-8 w-8 text-amber-500 hover:bg-amber-500/15 cursor-pointer"
-                                                                    title="Edit Data Sparepart"
-                                                                >
-                                                                    <Pencil className="h-4 w-4" />
-                                                                </Button>
-                                                            )}
-                                                            {isTrashed ? (
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    onClick={() => handleRestore(item)}
-                                                                    className="h-8 w-8 text-emerald-600 hover:bg-emerald-500/15 cursor-pointer"
-                                                                    title="Pulihkan (Restore) Sparepart"
-                                                                >
-                                                                    <RotateCcw className="h-4 w-4" />
-                                                                </Button>
-                                                            ) : (
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    onClick={() => handleDelete(item)}
-                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                                    title="Hapus (Soft Delete) Sparepart"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </Button>
-                                                            )}
-                                                        </div>
+                                                        <TooltipProvider>
+                                                            <div className="flex items-center justify-center gap-1">
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            onClick={() => setViewingItem(item)}
+                                                                            className="h-8 w-8 text-blue-500 hover:bg-blue-500/15 cursor-pointer"
+                                                                        >
+                                                                            <Eye className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>Lihat Detail Suku Cadang</TooltipContent>
+                                                                </Tooltip>
+
+                                                                {!isTrashed && (
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                onClick={() => openEditModal(item)}
+                                                                                className="h-8 w-8 text-amber-500 hover:bg-amber-500/15 cursor-pointer"
+                                                                            >
+                                                                                <Pencil className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>Edit Data Suku Cadang</TooltipContent>
+                                                                    </Tooltip>
+                                                                )}
+
+                                                                {isTrashed ? (
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                onClick={() => handleRestore(item)}
+                                                                                className="h-8 w-8 text-emerald-600 hover:bg-emerald-500/15 cursor-pointer"
+                                                                            >
+                                                                                <RotateCcw className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>Pulihkan Suku Cadang</TooltipContent>
+                                                                    </Tooltip>
+                                                                ) : (
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                onClick={() => handleDelete(item)}
+                                                                                className="h-8 w-8 text-amber-600 hover:bg-amber-500/15 cursor-pointer"
+                                                                            >
+                                                                                <Archive className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>Arsipkan Suku Cadang (Soft Delete)</TooltipContent>
+                                                                    </Tooltip>
+                                                                )}
+                                                            </div>
+                                                        </TooltipProvider>
                                                     </TableCell>
                                                 </TableRow>
                                             );
@@ -640,6 +682,18 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                     )}
                 </DialogContent>
             </Dialog>
+
+            {/* Confirmation Modal */}
+            <ConfirmDialog
+                open={confirmState.open}
+                onOpenChange={(open) => setConfirmState((prev) => ({ ...prev, open }))}
+                title={confirmState.title}
+                description={confirmState.description}
+                confirmText={confirmState.confirmText}
+                variant={confirmState.variant}
+                icon={confirmState.icon}
+                onConfirm={confirmState.onConfirm}
+            />
         </>
     );
 }

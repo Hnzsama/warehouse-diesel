@@ -1,6 +1,7 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { AlertTriangle, ArrowDownLeft, CheckCircle2, Clock, FileText, Filter, History, Image as ImageIcon, Plus, Search, Trash2, User as UserIcon } from 'lucide-react';
+import { AlertTriangle, ArrowDownLeft, CheckCircle2, Clock, FileSpreadsheet, FileText, Filter, History, Image as ImageIcon, Plus, Printer, Search, Trash2, User as UserIcon } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import Pagination from '@/components/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { SharedData } from '@/types/auth';
 import type { BreadcrumbItem } from '@/types';
 
@@ -189,6 +196,21 @@ export default function IncomingItemsIndex({ incomingItems, items, suppliers = [
     const [endDate, setEndDate] = useState(filters.end_date || '');
     const [userId, setUserId] = useState(filters.user_id || '');
 
+    const [confirmState, setConfirmState] = useState<{
+        open: boolean;
+        title: string;
+        description: string;
+        confirmText?: string;
+        variant?: 'destructive' | 'warning' | 'default' | 'emerald';
+        icon?: 'archive' | 'trash' | 'warning' | 'restore';
+        onConfirm: () => void;
+    }>({
+        open: false,
+        title: '',
+        description: '',
+        onConfirm: () => {},
+    });
+
     const { data, setData, post, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         reference_no: `IN-${Date.now().toString().slice(-6)}`,
         item_id: '',
@@ -260,13 +282,41 @@ export default function IncomingItemsIndex({ incomingItems, items, suppliers = [
     };
 
     const handleDelete = (tx: IncomingItem) => {
-        if (confirm(`Apakah Anda yakin ingin menghapus transaksi barang masuk "${tx.reference_no}"?\nStok barang akan dikurangi secara otomatis.`)) {
-            destroy(`/incoming-items/${tx.id}`);
-        }
+        setConfirmState({
+            open: true,
+            title: 'Hapus Transaksi Barang Masuk',
+            description: `Apakah Anda yakin ingin menghapus transaksi barang masuk "${tx.reference_no}"? Stok barang akan dikurangi secara otomatis.`,
+            confirmText: 'Hapus Transaksi',
+            variant: 'destructive',
+            icon: 'trash',
+            onConfirm: () => {
+                destroy(`/incoming-items/${tx.id}`, {
+                    onSuccess: () => setConfirmState((prev) => ({ ...prev, open: false })),
+                });
+            },
+        });
+    };
+
+    const handleExportExcel = () => {
+        const query = new URLSearchParams({
+            report_type: 'incoming',
+            start_date: startDate || '',
+            end_date: endDate || '',
+        }).toString();
+        window.open(`/reports/export-excel?${query}`, '_blank');
+    };
+
+    const handleExportPdf = () => {
+        const query = new URLSearchParams({
+            report_type: 'incoming',
+            start_date: startDate || '',
+            end_date: endDate || '',
+        }).toString();
+        window.open(`/reports/export-pdf?${query}`, '_blank');
     };
 
     return (
-        <>
+        <TooltipProvider>
             <Head title="Transaksi Barang Masuk" />
 
             <div className="flex flex-1 flex-col gap-5 p-3 sm:p-4 md:p-6 w-full max-w-full overflow-hidden">
@@ -296,10 +346,28 @@ export default function IncomingItemsIndex({ incomingItems, items, suppliers = [
                         </p>
                     </div>
 
-                    <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
-                        <Plus className="h-4 w-4" />
-                        <span>Catat Barang Masuk</span>
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                        <Button
+                            variant="outline"
+                            onClick={handleExportExcel}
+                            className="gap-2 cursor-pointer border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
+                        >
+                            <FileSpreadsheet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                            <span>Export Excel</span>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={handleExportPdf}
+                            className="gap-2 cursor-pointer border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                        >
+                            <Printer className="h-4 w-4" />
+                            <span>Cetak / PDF</span>
+                        </Button>
+                        <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
+                            <Plus className="h-4 w-4" />
+                            <span>Catat Barang Masuk</span>
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Filter Bar */}
@@ -440,15 +508,21 @@ export default function IncomingItemsIndex({ incomingItems, items, suppliers = [
                                                         )}
                                                     </td>
                                                     <td className="px-4 py-3.5 text-center" onClick={(e) => e.stopPropagation()}>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => handleDelete(tx)}
-                                                            className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                            title="Hapus Transaksi Masuk"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => handleDelete(tx)}
+                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Hapus Transaksi Masuk</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
                                                     </td>
                                                 </tr>
                                             );
@@ -652,7 +726,18 @@ export default function IncomingItemsIndex({ incomingItems, items, suppliers = [
                     )}
                 </DialogContent>
             </Dialog>
-        </>
+
+            <ConfirmDialog
+                open={confirmState.open}
+                onOpenChange={(open) => setConfirmState((prev) => ({ ...prev, open }))}
+                title={confirmState.title}
+                description={confirmState.description}
+                confirmText={confirmState.confirmText}
+                variant={confirmState.variant}
+                icon={confirmState.icon}
+                onConfirm={confirmState.onConfirm}
+            />
+        </TooltipProvider>
     );
 }
 

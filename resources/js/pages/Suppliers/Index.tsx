@@ -1,6 +1,7 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { AlertTriangle, CheckCircle2, Plus, Search, Trash2, Truck } from 'lucide-react';
+import { AlertTriangle, Archive, CheckCircle2, FileSpreadsheet, Plus, Printer, Search, Trash2, Truck } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import Pagination from '@/components/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { SharedData } from '@/types/auth';
 import type { BreadcrumbItem } from '@/types';
 
@@ -61,6 +68,21 @@ export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexPro
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
     const [search, setSearch] = useState(filters.search || '');
+
+    const [confirmState, setConfirmState] = useState<{
+        open: boolean;
+        title: string;
+        description: string;
+        confirmText?: string;
+        variant?: 'destructive' | 'warning' | 'default' | 'emerald';
+        icon?: 'archive' | 'trash' | 'warning' | 'restore';
+        onConfirm: () => void;
+    }>({
+        open: false,
+        title: '',
+        description: '',
+        onConfirm: () => {},
+    });
 
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         code: '',
@@ -111,13 +133,31 @@ export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexPro
     };
 
     const handleDelete = (supplier: Supplier) => {
-        if (confirm(`Apakah Anda yakin ingin menghapus supplier "${supplier.name}"?`)) {
-            destroy(`/suppliers/${supplier.id}`);
-        }
+        setConfirmState({
+            open: true,
+            title: 'Hapus Data Supplier',
+            description: `Apakah Anda yakin ingin menghapus data supplier "${supplier.name}"? Data yang dihapus tidak dapat dikembalikan.`,
+            confirmText: 'Hapus Supplier',
+            variant: 'destructive',
+            icon: 'trash',
+            onConfirm: () => {
+                destroy(`/suppliers/${supplier.id}`, {
+                    onSuccess: () => setConfirmState((prev) => ({ ...prev, open: false })),
+                });
+            },
+        });
+    };
+
+    const handleExportExcel = () => {
+        window.open('/suppliers/export-excel', '_blank');
+    };
+
+    const handleExportPdf = () => {
+        window.open('/suppliers/export-pdf', '_blank');
     };
 
     return (
-        <>
+        <TooltipProvider>
             <Head title="Data Supplier & Distributor Sparepart" />
 
             <div className="flex flex-1 flex-col gap-5 p-3 sm:p-4 md:p-6 w-full max-w-full overflow-hidden">
@@ -147,10 +187,28 @@ export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexPro
                         </p>
                     </div>
 
-                    <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
-                        <Plus className="h-4 w-4" />
-                        <span>Tambah Supplier Baru</span>
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                        <Button
+                            variant="outline"
+                            onClick={handleExportExcel}
+                            className="gap-2 cursor-pointer border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
+                        >
+                            <FileSpreadsheet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                            <span>Export Excel</span>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={handleExportPdf}
+                            className="gap-2 cursor-pointer border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                        >
+                            <Printer className="h-4 w-4" />
+                            <span>Cetak / PDF</span>
+                        </Button>
+                        <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
+                            <Plus className="h-4 w-4" />
+                            <span>Tambah Supplier Baru</span>
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Search Bar Filter */}
@@ -183,7 +241,7 @@ export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexPro
                                         <TableHead>Kontak & Email</TableHead>
                                         <TableHead>Alamat</TableHead>
                                         <TableHead className="text-center">Riwayat Transaksi</TableHead>
-                                        <TableHead className="text-center w-[60px]">Hapus</TableHead>
+                                        <TableHead className="text-center w-[60px]">Aksi</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -224,15 +282,21 @@ export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexPro
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => handleDelete(sup)}
-                                                        className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                        title="Hapus Supplier"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => handleDelete(sup)}
+                                                                className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>Hapus Supplier</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
                                                 </TableCell>
                                             </TableRow>
                                         ))
@@ -343,7 +407,18 @@ export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexPro
                     </form>
                 </DialogContent>
             </Dialog>
-        </>
+
+            <ConfirmDialog
+                open={confirmState.open}
+                onOpenChange={(open) => setConfirmState((prev) => ({ ...prev, open }))}
+                title={confirmState.title}
+                description={confirmState.description}
+                confirmText={confirmState.confirmText}
+                variant={confirmState.variant}
+                icon={confirmState.icon}
+                onConfirm={confirmState.onConfirm}
+            />
+        </TooltipProvider>
     );
 }
 

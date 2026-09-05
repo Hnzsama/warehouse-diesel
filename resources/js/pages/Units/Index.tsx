@@ -1,6 +1,7 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { AlertTriangle, CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import Pagination from '@/components/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { SharedData } from '@/types/auth';
 import type { BreadcrumbItem } from '@/types';
 
@@ -52,6 +59,21 @@ export default function UnitsIndex({ units }: UnitsIndexProps) {
     const { flash } = usePage<SharedData>().props;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
+
+    const [confirmState, setConfirmState] = useState<{
+        open: boolean;
+        title: string;
+        description: string;
+        confirmText?: string;
+        variant?: 'destructive' | 'warning' | 'default' | 'emerald';
+        icon?: 'archive' | 'trash' | 'warning' | 'restore';
+        onConfirm: () => void;
+    }>({
+        open: false,
+        title: '',
+        description: '',
+        onConfirm: () => {},
+    });
 
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         name: '',
@@ -86,13 +108,23 @@ export default function UnitsIndex({ units }: UnitsIndexProps) {
     };
 
     const handleDelete = (unit: Unit) => {
-        if (confirm(`Apakah Anda yakin ingin menghapus satuan "${unit.name}"?`)) {
-            destroy(`/units/${unit.id}`);
-        }
+        setConfirmState({
+            open: true,
+            title: 'Hapus Satuan Barang',
+            description: `Apakah Anda yakin ingin menghapus satuan "${unit.name}"?`,
+            confirmText: 'Hapus Satuan',
+            variant: 'destructive',
+            icon: 'trash',
+            onConfirm: () => {
+                destroy(`/units/${unit.id}`, {
+                    onSuccess: () => setConfirmState((prev) => ({ ...prev, open: false })),
+                });
+            },
+        });
     };
 
     return (
-        <>
+        <TooltipProvider>
             <Head title="Satuan Barang Sparepart" />
 
             <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
@@ -162,15 +194,21 @@ export default function UnitsIndex({ units }: UnitsIndexProps) {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleDelete(unit)}
-                                                    className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                    title="Hapus Satuan"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => handleDelete(unit)}
+                                                            className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Hapus Satuan</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
                                             </TableCell>
                                         </TableRow>
                                     ))
@@ -226,7 +264,18 @@ export default function UnitsIndex({ units }: UnitsIndexProps) {
                     </form>
                 </DialogContent>
             </Dialog>
-        </>
+
+            <ConfirmDialog
+                open={confirmState.open}
+                onOpenChange={(open) => setConfirmState((prev) => ({ ...prev, open }))}
+                title={confirmState.title}
+                description={confirmState.description}
+                confirmText={confirmState.confirmText}
+                variant={confirmState.variant}
+                icon={confirmState.icon}
+                onConfirm={confirmState.onConfirm}
+            />
+        </TooltipProvider>
     );
 }
 

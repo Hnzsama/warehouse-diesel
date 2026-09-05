@@ -41,6 +41,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:admin|pemilik'])->group(function () {
         Route::resource('categories', CategoryController::class)->except(['create', 'edit', 'show']);
         Route::resource('units', UnitController::class)->except(['create', 'edit', 'show']);
+        Route::get('/suppliers/export-pdf', [SupplierController::class, 'exportPdf'])->name('suppliers.export-pdf');
+        Route::get('/suppliers/export-excel', [SupplierController::class, 'exportExcel'])->name('suppliers.export-excel');
         Route::resource('suppliers', SupplierController::class)->except(['create', 'edit', 'show']);
         Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
     });
