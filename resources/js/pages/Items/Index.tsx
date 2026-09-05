@@ -98,7 +98,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function ItemsIndex({ items, categories, units, filters }: ItemsIndexProps) {
-    const { flash } = usePage<SharedData>().props;
+    const { auth, flash } = usePage<SharedData>().props;
+    const user = auth.user;
+    const isOwner = Boolean(
+        user.is_pemilik ||
+        user.roles?.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'))
+    );
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<Item | null>(null);
     const [viewingItem, setViewingItem] = useState<Item | null>(null);
@@ -270,10 +276,12 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                             <Printer className="h-4 w-4" />
                             <span>Cetak / PDF</span>
                         </Button>
-                        <Button onClick={openCreateModal} className="gap-2 shadow-sm cursor-pointer justify-center">
-                            <Plus className="h-4 w-4" />
-                            <span>Tambah Sparepart Baru</span>
-                        </Button>
+                        {!isOwner && (
+                            <Button onClick={openCreateModal} className="gap-2 shadow-sm cursor-pointer justify-center">
+                                <Plus className="h-4 w-4" />
+                                <span>Tambah Sparepart Baru</span>
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -425,7 +433,7 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                                                                     <TooltipContent>Lihat Detail Suku Cadang</TooltipContent>
                                                                 </Tooltip>
 
-                                                                {!isTrashed && (
+                                                                {!isOwner && !isTrashed && (
                                                                     <Tooltip>
                                                                         <TooltipTrigger asChild>
                                                                             <Button
@@ -441,7 +449,7 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                                                                     </Tooltip>
                                                                 )}
 
-                                                                {isTrashed ? (
+                                                                {!isOwner && (isTrashed ? (
                                                                     <Tooltip>
                                                                         <TooltipTrigger asChild>
                                                                             <Button
@@ -469,7 +477,7 @@ export default function ItemsIndex({ items, categories, units, filters }: ItemsI
                                                                         </TooltipTrigger>
                                                                         <TooltipContent>Arsipkan Suku Cadang (Soft Delete)</TooltipContent>
                                                                     </Tooltip>
-                                                                )}
+                                                                ))}
                                                             </div>
                                                         </TooltipProvider>
                                                     </TableCell>

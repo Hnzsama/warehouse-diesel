@@ -183,7 +183,13 @@ const getReasonLabel = (reason: string) => {
 };
 
 export default function StockAdjustmentsIndex({ adjustments, items, autoRef, users = [], filters }: StockAdjustmentsIndexProps) {
-    const { flash } = usePage<SharedData>().props;
+    const { auth, flash } = usePage<SharedData>().props;
+    const user = auth.user;
+    const isOwner = Boolean(
+        user.is_pemilik ||
+        user.roles?.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'))
+    );
+
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [search, setSearch] = useState(filters.search || '');
@@ -296,10 +302,12 @@ export default function StockAdjustmentsIndex({ adjustments, items, autoRef, use
                         </p>
                     </div>
 
-                    <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
-                        <Plus className="h-4 w-4" />
-                        <span>Catat Penyesuaian Stok</span>
-                    </Button>
+                    {!isOwner && (
+                        <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
+                            <Plus className="h-4 w-4" />
+                            <span>Catat Penyesuaian Stok</span>
+                        </Button>
+                    )}
                 </div>
 
                 {/* Filter Bar */}
@@ -370,13 +378,13 @@ export default function StockAdjustmentsIndex({ adjustments, items, autoRef, use
                                         <th className="px-4 py-3.5 text-center">Alasan</th>
                                         <th className="px-4 py-3.5">Catatan</th>
                                         <th className="px-4 py-3.5">Operator</th>
-                                        <th className="px-4 py-3.5 text-center w-[70px]">Batal</th>
+                                        {!isOwner && <th className="px-4 py-3.5 text-center w-[70px]">Batal</th>}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border">
                                     {adjustments.data.length === 0 ? (
                                         <tr>
-                                            <td colSpan={8} className="py-8 text-center text-xs text-muted-foreground">
+                                            <td colSpan={isOwner ? 7 : 8} className="py-8 text-center text-xs text-muted-foreground">
                                                 Belum ada riwayat penyesuaian stok (stock opname).
                                             </td>
                                         </tr>
@@ -426,23 +434,25 @@ export default function StockAdjustmentsIndex({ adjustments, items, autoRef, use
                                                             {getRoleBadge(adj.user)}
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-3.5 text-center">
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    onClick={() => handleDelete(adj)}
-                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                <p>Batalkan Penyesuaian Stok</p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </td>
+                                                    {!isOwner && (
+                                                        <td className="px-4 py-3.5 text-center">
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => handleDelete(adj)}
+                                                                        className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>Batalkan Penyesuaian Stok</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </td>
+                                                    )}
                                                 </tr>
                                             );
                                         })

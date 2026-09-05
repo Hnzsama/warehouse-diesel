@@ -187,9 +187,16 @@ const formatForDateTimeLocal = (dateStr: string | Date | null) => {
 };
 
 export default function OutgoingItemsIndex({ outgoingItems, items, suppliers = [], users = [], filters }: OutgoingItemsIndexProps) {
-    const { flash } = usePage<SharedData>().props;
+    const { auth, flash } = usePage<SharedData>().props;
+    const user = auth.user;
+    const isOwner = Boolean(
+        user.is_pemilik ||
+        user.roles?.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'))
+    );
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<OutgoingItem | null>(null);
+    const [viewingItem, setViewingItem] = useState<OutgoingItem | null>(null);
     const [selectedReceiptUrl, setSelectedReceiptUrl] = useState<string | null>(null);
 
     const [search, setSearch] = useState(filters.search || '');
@@ -365,10 +372,12 @@ export default function OutgoingItemsIndex({ outgoingItems, items, suppliers = [
                             <Printer className="h-4 w-4" />
                             <span>Cetak / PDF</span>
                         </Button>
-                        <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
-                            <Plus className="h-4 w-4" />
-                            <span>Catat Barang Keluar</span>
-                        </Button>
+                        {!isOwner && (
+                            <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
+                                <Plus className="h-4 w-4" />
+                                <span>Catat Barang Keluar</span>
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -440,13 +449,13 @@ export default function OutgoingItemsIndex({ outgoingItems, items, suppliers = [
                                         <th className="px-4 py-3.5">Penerima / Peruntukan</th>
                                         <th className="px-4 py-3.5 text-center">Bukti Bon</th>
                                         <th className="px-4 py-3.5">Operator (Input / Edit)</th>
-                                        <th className="px-4 py-3.5 text-center w-[70px]">Hapus</th>
+                                        {!isOwner && <th className="px-4 py-3.5 text-center w-[70px]">Hapus</th>}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border">
                                     {outgoingItems.data.length === 0 ? (
                                         <tr>
-                                            <td colSpan={8} className="py-8 text-center text-xs text-muted-foreground">
+                                            <td colSpan={isOwner ? 7 : 8} className="py-8 text-center text-xs text-muted-foreground">
                                                 Belum ada riwayat transaksi barang keluar.
                                             </td>
                                         </tr>
@@ -456,9 +465,9 @@ export default function OutgoingItemsIndex({ outgoingItems, items, suppliers = [
                                             return (
                                                 <tr
                                                     key={tx.id}
-                                                    onClick={() => openEditModal(tx)}
+                                                    onClick={() => (isOwner ? setViewingItem(tx) : openEditModal(tx))}
                                                     className="hover:bg-muted/60 transition-colors cursor-pointer group"
-                                                    title="Klik untuk mengedit transaksi barang keluar ini"
+                                                    title={isOwner ? 'Klik untuk melihat detail transaksi barang keluar' : 'Klik untuk mengedit transaksi barang keluar ini'}
                                                 >
                                                     <td className="px-4 py-3.5 font-mono font-bold group-hover:text-primary transition-colors">{tx.reference_no}</td>
                                                     <td className="px-4 py-3.5 font-medium whitespace-nowrap text-xs text-muted-foreground">{formatDateWithTime(tx.date)}</td>
@@ -508,23 +517,25 @@ export default function OutgoingItemsIndex({ outgoingItems, items, suppliers = [
                                                             </div>
                                                         )}
                                                     </td>
-                                                    <td className="px-4 py-3.5 text-center" onClick={(e) => e.stopPropagation()}>
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    onClick={() => handleDelete(tx)}
-                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                <p>Hapus Transaksi Keluar</p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </td>
+                                                    {!isOwner && (
+                                                        <td className="px-4 py-3.5 text-center" onClick={(e) => e.stopPropagation()}>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => handleDelete(tx)}
+                                                                        className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>Hapus Transaksi Keluar</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </td>
+                                                    )}
                                                 </tr>
                                             );
                                         })
@@ -736,6 +747,87 @@ export default function OutgoingItemsIndex({ outgoingItems, items, suppliers = [
                                 alt="Bukti Bon Transaksi"
                                 className="max-h-[70vh] w-auto max-w-full object-contain rounded"
                             />
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Read-Only Detail View Modal for Owner / Monitoring */}
+            <Dialog open={!!viewingItem} onOpenChange={() => setViewingItem(null)}>
+                <DialogContent className="sm:max-w-lg max-w-[95vw] rounded-lg">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-base sm:text-lg font-bold">
+                            <ArrowUpRight className="h-5 w-5" />
+                            <span>Detail Transaksi Barang Keluar</span>
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    {viewingItem && (
+                        <div className="space-y-4 pt-2 text-sm">
+                            <div className="grid grid-cols-2 gap-3 bg-muted/50 p-3 rounded-lg border border-border">
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">No. Bon / Referensi</span>
+                                    <span className="font-mono font-bold text-foreground">{viewingItem.reference_no}</span>
+                                </div>
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Tanggal & Waktu Keluar</span>
+                                    <span className="font-bold text-foreground text-xs">{formatDateWithTime(viewingItem.date)}</span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Suku Cadang</span>
+                                    <span className="font-bold text-foreground">{viewingItem.item?.name || 'Item Terhapus'}</span>
+                                    <span className="text-xs text-muted-foreground font-mono block">({viewingItem.item?.item_code || '-'})</span>
+                                </div>
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Jumlah Keluar</span>
+                                    <Badge variant="outline" className="font-bold bg-amber-500/10 text-amber-500 border-amber-500/20 mt-1">
+                                        -{viewingItem.quantity} {viewingItem.item?.unit?.short_name}
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 bg-card p-3 rounded-lg border border-border">
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Penerima / Armada Truk</span>
+                                    <span className="font-semibold text-foreground">{viewingItem.recipient || '-'}</span>
+                                </div>
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Operator Pencatat</span>
+                                    <span className="font-semibold text-foreground">{viewingItem.user?.name || 'Admin'}</span>
+                                </div>
+                            </div>
+
+                            {viewingItem.invoice_image_url && (
+                                <div className="p-3 bg-muted/30 rounded-lg border border-border">
+                                    <span className="text-xs text-muted-foreground block mb-1">Bukti Bon / Kwitansi</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedReceiptUrl(viewingItem.invoice_image_url)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted hover:bg-muted/80 text-xs font-semibold text-foreground border border-border transition-colors cursor-pointer"
+                                    >
+                                        <ImageIcon className="h-4 w-4 text-amber-500" />
+                                        <span>Lihat Gambar Bon Pratinjau</span>
+                                    </button>
+                                </div>
+                            )}
+
+                            {viewingItem.notes && (
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Catatan / Keterangan</span>
+                                    <p className="text-xs font-medium text-foreground bg-muted/40 p-2.5 rounded border border-border mt-1">
+                                        {viewingItem.notes}
+                                    </p>
+                                </div>
+                            )}
+
+                            <div className="flex items-center justify-end pt-3 border-t border-border">
+                                <Button type="button" variant="secondary" onClick={() => setViewingItem(null)} className="cursor-pointer">
+                                    Tutup
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </DialogContent>

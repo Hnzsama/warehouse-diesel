@@ -56,7 +56,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
-    const { flash } = usePage<SharedData>().props;
+    const { auth, flash } = usePage<SharedData>().props;
+    const user = auth.user;
+    const isOwner = Boolean(
+        user.is_pemilik ||
+        user.roles?.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'))
+    );
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
@@ -152,10 +158,12 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                         </p>
                     </div>
 
-                    <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
-                        <Plus className="h-4 w-4" />
-                        <span>Tambah Kategori</span>
-                    </Button>
+                    {!isOwner && (
+                        <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
+                            <Plus className="h-4 w-4" />
+                            <span>Tambah Kategori</span>
+                        </Button>
+                    )}
                 </div>
 
                 {/* Categories Table */}
@@ -168,13 +176,13 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                                         <TableHead>Nama Kategori</TableHead>
                                         <TableHead>Slug System</TableHead>
                                         <TableHead className="text-center">Jumlah Sparepart</TableHead>
-                                        <TableHead className="text-center w-[60px]">Hapus</TableHead>
+                                        {!isOwner && <TableHead className="text-center w-[60px]">Hapus</TableHead>}
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {categories.data.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={4} className="py-8 text-center text-xs text-muted-foreground">
+                                            <TableCell colSpan={isOwner ? 3 : 4} className="py-8 text-center text-xs text-muted-foreground">
                                                 Belum ada data kategori.
                                             </TableCell>
                                         </TableRow>
@@ -182,9 +190,9 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                                         categories.data.map((cat) => (
                                             <TableRow
                                                 key={cat.id}
-                                                onClick={() => openEditModal(cat)}
-                                                className="cursor-pointer hover:bg-muted/70 transition-colors group"
-                                                title="Klik untuk mengedit kategori ini"
+                                                onClick={() => (!isOwner ? openEditModal(cat) : undefined)}
+                                                className={`transition-colors group ${!isOwner ? 'cursor-pointer hover:bg-muted/70' : ''}`}
+                                                title={!isOwner ? 'Klik untuk mengedit kategori ini' : undefined}
                                             >
                                                 <TableCell className="font-bold text-foreground group-hover:text-primary transition-colors">{cat.name}</TableCell>
                                                 <TableCell className="font-mono text-xs text-muted-foreground">{cat.slug}</TableCell>
@@ -193,23 +201,25 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                                                         {cat.items_count ?? 0} Item
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => handleDelete(cat)}
-                                                                className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            <p>Hapus Kategori</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TableCell>
+                                                {!isOwner && (
+                                                    <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => handleDelete(cat)}
+                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Hapus Kategori</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TableCell>
+                                                )}
                                             </TableRow>
                                         ))
                                     )}

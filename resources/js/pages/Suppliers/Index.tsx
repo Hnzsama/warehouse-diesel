@@ -64,9 +64,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexProps) {
-    const { flash } = usePage<SharedData>().props;
+    const { auth, flash } = usePage<SharedData>().props;
+    const user = auth.user;
+    const isOwner = Boolean(
+        user.is_pemilik ||
+        user.roles?.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'))
+    );
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+    const [viewingSupplier, setViewingSupplier] = useState<Supplier | null>(null);
     const [search, setSearch] = useState(filters.search || '');
 
     const [confirmState, setConfirmState] = useState<{
@@ -204,10 +211,12 @@ export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexPro
                             <Printer className="h-4 w-4" />
                             <span>Cetak / PDF</span>
                         </Button>
-                        <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
-                            <Plus className="h-4 w-4" />
-                            <span>Tambah Supplier Baru</span>
-                        </Button>
+                        {!isOwner && (
+                            <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
+                                <Plus className="h-4 w-4" />
+                                <span>Tambah Supplier Baru</span>
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -241,13 +250,13 @@ export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexPro
                                         <TableHead>Kontak & Email</TableHead>
                                         <TableHead>Alamat</TableHead>
                                         <TableHead className="text-center">Riwayat Transaksi</TableHead>
-                                        <TableHead className="text-center w-[60px]">Aksi</TableHead>
+                                        {!isOwner && <TableHead className="text-center w-[60px]">Aksi</TableHead>}
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {suppliers.data.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={6} className="py-8 text-center text-xs text-muted-foreground">
+                                            <TableCell colSpan={isOwner ? 5 : 6} className="py-8 text-center text-xs text-muted-foreground">
                                                 Belum ada data supplier yang terdaftar.
                                             </TableCell>
                                         </TableRow>
@@ -255,9 +264,9 @@ export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexPro
                                         suppliers.data.map((sup) => (
                                             <TableRow
                                                 key={sup.id}
-                                                onClick={() => openEditModal(sup)}
+                                                onClick={() => (isOwner ? setViewingSupplier(sup) : openEditModal(sup))}
                                                 className="cursor-pointer hover:bg-muted/70 transition-colors group"
-                                                title="Klik untuk mengedit supplier ini"
+                                                title={isOwner ? 'Klik untuk melihat detail supplier' : 'Klik untuk mengedit supplier ini'}
                                             >
                                                 <TableCell className="font-mono text-xs font-semibold text-primary">{sup.code}</TableCell>
                                                 <TableCell className="font-bold text-foreground group-hover:text-primary transition-colors">
@@ -281,23 +290,25 @@ export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexPro
                                                         </Badge>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => handleDelete(sup)}
-                                                                className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            <p>Hapus Supplier</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TableCell>
+                                                {!isOwner && (
+                                                    <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => handleDelete(sup)}
+                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Hapus Supplier</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TableCell>
+                                                )}
                                             </TableRow>
                                         ))
                                     )}
@@ -405,6 +416,64 @@ export default function SuppliersIndex({ suppliers, filters }: SuppliersIndexPro
                             </Button>
                         </div>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Read-Only Detail View Modal for Owner / Monitoring */}
+            <Dialog open={!!viewingSupplier} onOpenChange={() => setViewingSupplier(null)}>
+                <DialogContent className="sm:max-w-md max-w-[95vw] rounded-lg">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-primary text-base sm:text-lg font-bold">
+                            <Truck className="h-5 w-5" />
+                            <span>Detail Supplier & Distributor</span>
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    {viewingSupplier && (
+                        <div className="space-y-4 pt-2 text-sm">
+                            <div className="grid grid-cols-2 gap-3 bg-muted/50 p-3 rounded-lg border border-border">
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Kode Supplier</span>
+                                    <span className="font-mono font-bold text-foreground">{viewingSupplier.code}</span>
+                                </div>
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Nama Supplier</span>
+                                    <span className="font-bold text-foreground">{viewingSupplier.name}</span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">No. Telepon / HP</span>
+                                    <span className="font-medium text-foreground">{viewingSupplier.phone || '-'}</span>
+                                </div>
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Email</span>
+                                    <span className="font-medium text-foreground text-xs">{viewingSupplier.email || '-'}</span>
+                                </div>
+                            </div>
+
+                            <div className="bg-card p-3 rounded-lg border border-border">
+                                <span className="text-xs text-muted-foreground block">Alamat Lengkap</span>
+                                <span className="font-medium text-foreground text-xs">{viewingSupplier.address || 'Belum diisi'}</span>
+                            </div>
+
+                            {viewingSupplier.notes && (
+                                <div>
+                                    <span className="text-xs text-muted-foreground block">Catatan / Keterangan</span>
+                                    <p className="text-xs font-medium text-foreground bg-muted/40 p-2.5 rounded border border-border mt-1">
+                                        {viewingSupplier.notes}
+                                    </p>
+                                </div>
+                            )}
+
+                            <div className="flex items-center justify-end pt-3 border-t border-border">
+                                <Button type="button" variant="secondary" onClick={() => setViewingSupplier(null)} className="cursor-pointer">
+                                    Tutup
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
 

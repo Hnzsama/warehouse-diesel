@@ -11,6 +11,7 @@ import {
     Filter,
     PackageMinus,
     PackagePlus,
+    Printer,
     SlidersHorizontal,
     TrendingUp,
     Wrench,
@@ -178,7 +179,8 @@ export default function Dashboard({
                                 <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
                                     {isStaf && 'Panel Pencatatan Transaksi Barang Masuk dan Barang Keluar Gudang Diesel Truk Medan.'}
                                     {isQc && 'Panel Monitoring Kualitas Stok, Pemeriksaan Barang Rusak & Penyesuaian Opname Gudang.'}
-                                    {(isAdmin || isOwner) && 'Panel Ringkasan & Monitoring Keseluruhan Stok Gudang Diesel Truk Medan.'}
+                                    {isOwner && 'Panel Monitoring & Laporan Executive Persediaan Gudang Diesel Truk Medan (Monitoring & Export Laporan).'}
+                                    {isAdmin && !isOwner && 'Panel Kendali Utama & Executive Monitoring Keseluruhan Stok Gudang Diesel Truk Medan.'}
                                 </p>
                             </div>
 
@@ -190,6 +192,12 @@ export default function Dashboard({
                                                 <FileText className="h-4 w-4" />
                                                 <span>Laporan Persediaan</span>
                                             </Link>
+                                        </Button>
+                                        <Button asChild variant="outline" size="sm" className="gap-2 cursor-pointer border-slate-300 dark:border-slate-700 text-foreground hover:bg-muted">
+                                            <a href="/reports/export-pdf?report_type=stock" target="_blank" rel="noopener noreferrer">
+                                                <Printer className="h-4 w-4" />
+                                                <span>Cetak Laporan / PDF</span>
+                                            </a>
                                         </Button>
                                         <Button asChild variant="outline" size="sm" className="gap-2 cursor-pointer border-emerald-500/30 hover:border-emerald-500 text-emerald-600 dark:text-emerald-400">
                                             <a href={excelExportUrl} target="_blank" rel="noopener noreferrer">

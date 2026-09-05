@@ -134,6 +134,10 @@ const getRoleBadge = (user?: any) => {
 export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
     const { auth, flash } = usePage<SharedData>().props;
     const currentUser = auth.user;
+    const isOwner = Boolean(
+        currentUser?.is_pemilik ||
+        currentUser?.roles?.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'))
+    );
     const getInitials = useInitials();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -260,10 +264,12 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                         </p>
                     </div>
 
-                    <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
-                        <UserPlus className="h-4 w-4" />
-                        <span>+ Tambah Pengguna Baru</span>
-                    </Button>
+                    {!isOwner && (
+                        <Button onClick={openCreateModal} className="w-full sm:w-auto gap-2 shadow-sm cursor-pointer justify-center">
+                            <UserPlus className="h-4 w-4" />
+                            <span>+ Tambah Pengguna Baru</span>
+                        </Button>
+                    )}
                 </div>
 
                 {/* Filter Bar */}
@@ -313,13 +319,13 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                                         <TableHead className="min-w-[150px]">Nama Pengguna</TableHead>
                                         <TableHead className="min-w-[180px]">Alamat Email</TableHead>
                                         <TableHead className="text-center min-w-[140px]">Peran Akses</TableHead>
-                                        <TableHead className="text-center w-[80px]">Hapus</TableHead>
+                                        {!isOwner && <TableHead className="text-center w-[80px]">Hapus</TableHead>}
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {users.data.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={4} className="py-8 text-center text-xs text-muted-foreground">
+                                            <TableCell colSpan={isOwner ? 3 : 4} className="py-8 text-center text-xs text-muted-foreground">
                                                 Tidak ada data pengguna ditemukan.
                                             </TableCell>
                                         </TableRow>
@@ -329,9 +335,9 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                                             return (
                                                 <TableRow
                                                     key={u.id}
-                                                    onClick={() => openEditModal(u)}
-                                                    className="cursor-pointer hover:bg-muted/70 transition-colors group"
-                                                    title="Klik untuk mengedit pengguna ini"
+                                                    onClick={() => (!isOwner ? openEditModal(u) : undefined)}
+                                                    className={`transition-colors group ${!isOwner ? 'cursor-pointer hover:bg-muted/70' : ''}`}
+                                                    title={!isOwner ? 'Klik untuk mengedit pengguna ini' : undefined}
                                                 >
                                                     <TableCell className="font-bold text-foreground group-hover:text-primary transition-colors py-2.5">
                                                         <div className="flex items-center gap-3">
@@ -355,27 +361,29 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                                                     <TableCell className="text-center">
                                                         {getRoleBadge(u)}
                                                     </TableCell>
-                                                    <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                        {!isSelf ? (
-                                                            <Tooltip>
-                                                                <TooltipTrigger asChild>
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="icon"
-                                                                        onClick={() => handleDelete(u)}
-                                                                        className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                                    >
-                                                                        <Trash2 className="h-4 w-4" />
-                                                                    </Button>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent>
-                                                                    <p>Hapus Akses Pengguna</p>
-                                                                </TooltipContent>
-                                                            </Tooltip>
-                                                        ) : (
-                                                            <span className="text-xs text-muted-foreground">-</span>
-                                                        )}
-                                                    </TableCell>
+                                                    {!isOwner && (
+                                                        <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                                                            {!isSelf ? (
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            onClick={() => handleDelete(u)}
+                                                                            className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                                        >
+                                                                            <Trash2 className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <p>Hapus Akses Pengguna</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            ) : (
+                                                                <span className="text-xs text-muted-foreground">-</span>
+                                                            )}
+                                                        </TableCell>
+                                                    )}
                                                 </TableRow>
                                             );
                                         })

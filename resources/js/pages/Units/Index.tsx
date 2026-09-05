@@ -56,7 +56,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function UnitsIndex({ units }: UnitsIndexProps) {
-    const { flash } = usePage<SharedData>().props;
+    const { auth, flash } = usePage<SharedData>().props;
+    const user = auth.user;
+    const isOwner = Boolean(
+        user.is_pemilik ||
+        user.roles?.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'))
+    );
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
 
@@ -153,10 +159,12 @@ export default function UnitsIndex({ units }: UnitsIndexProps) {
                         </p>
                     </div>
 
-                    <Button onClick={openCreateModal} className="gap-2 shadow-sm cursor-pointer">
-                        <Plus className="h-4 w-4" />
-                        <span>Tambah Satuan</span>
-                    </Button>
+                    {!isOwner && (
+                        <Button onClick={openCreateModal} className="gap-2 shadow-sm cursor-pointer">
+                            <Plus className="h-4 w-4" />
+                            <span>Tambah Satuan</span>
+                        </Button>
+                    )}
                 </div>
 
                 {/* Units Table */}
@@ -168,13 +176,13 @@ export default function UnitsIndex({ units }: UnitsIndexProps) {
                                     <TableHead>Nama Satuan</TableHead>
                                     <TableHead>Singkatan</TableHead>
                                     <TableHead className="text-center">Jumlah Sparepart</TableHead>
-                                    <TableHead className="text-center">Hapus</TableHead>
+                                    {!isOwner && <TableHead className="text-center">Hapus</TableHead>}
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {units.data.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="py-8 text-center text-xs text-muted-foreground">
+                                        <TableCell colSpan={isOwner ? 3 : 4} className="py-8 text-center text-xs text-muted-foreground">
                                             Belum ada data satuan barang.
                                         </TableCell>
                                     </TableRow>
@@ -182,9 +190,9 @@ export default function UnitsIndex({ units }: UnitsIndexProps) {
                                     units.data.map((unit) => (
                                         <TableRow
                                             key={unit.id}
-                                            onClick={() => openEditModal(unit)}
-                                            className="cursor-pointer hover:bg-muted/70 transition-colors group"
-                                            title="Klik untuk mengedit satuan ini"
+                                            onClick={() => (!isOwner ? openEditModal(unit) : undefined)}
+                                            className={`transition-colors group ${!isOwner ? 'cursor-pointer hover:bg-muted/70' : ''}`}
+                                            title={!isOwner ? 'Klik untuk mengedit satuan ini' : undefined}
                                         >
                                             <TableCell className="font-bold text-foreground group-hover:text-primary transition-colors">{unit.name}</TableCell>
                                             <TableCell className="font-mono text-xs text-muted-foreground">{unit.short_name}</TableCell>
@@ -193,23 +201,25 @@ export default function UnitsIndex({ units }: UnitsIndexProps) {
                                                     {unit.items_count ?? 0} Item
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => handleDelete(unit)}
-                                                            className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p>Hapus Satuan</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TableCell>
+                                            {!isOwner && (
+                                                <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => handleDelete(unit)}
+                                                                className="h-8 w-8 text-destructive hover:bg-destructive/15 cursor-pointer"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>Hapus Satuan</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TableCell>
+                                            )}
                                         </TableRow>
                                     ))
                                 )}
