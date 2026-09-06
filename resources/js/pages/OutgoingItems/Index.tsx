@@ -111,18 +111,8 @@ const formatShortName = (name?: string | null) => {
 const getRoleBadge = (user?: any) => {
     if (!user) return null;
     const roles = user.roles || [];
-    const isAdmin = user.is_admin || roles.some((r: any) => (typeof r === 'string' ? r === 'admin' : r?.name === 'admin'));
     const isOwner = user.is_pemilik || roles.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'));
-    const isStaf = user.is_staf || roles.some((r: any) => (typeof r === 'string' ? r === 'staf_operasional' : r?.name === 'staf_operasional'));
-    const isQc = user.is_qc || roles.some((r: any) => (typeof r === 'string' ? r === 'admin_qc' : r?.name === 'admin_qc'));
 
-    if (isAdmin) {
-        return (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-bold bg-red-500/10 text-red-600 border-red-500/20 dark:text-red-400 whitespace-nowrap shrink-0">
-                Admin
-            </Badge>
-        );
-    }
     if (isOwner) {
         return (
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-bold bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400 whitespace-nowrap shrink-0">
@@ -130,36 +120,20 @@ const getRoleBadge = (user?: any) => {
             </Badge>
         );
     }
-    if (isStaf) {
-        return (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400 whitespace-nowrap shrink-0">
-                Staf Op
-            </Badge>
-        );
-    }
-    if (isQc) {
-        return (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-bold bg-purple-500/10 text-purple-600 border-purple-500/20 dark:text-purple-400 whitespace-nowrap shrink-0">
-                Admin QC
-            </Badge>
-        );
-    }
-    return null;
+    return (
+        <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-bold bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400 whitespace-nowrap shrink-0">
+            Admin Gudang
+        </Badge>
+    );
 };
 
 const getUserRoleLabel = (user?: any) => {
     if (!user) return '';
     const roles = user.roles || [];
-    const isAdmin = user.is_admin || roles.some((r: any) => (typeof r === 'string' ? r === 'admin' : r?.name === 'admin'));
     const isOwner = user.is_pemilik || roles.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'));
-    const isStaf = user.is_staf || roles.some((r: any) => (typeof r === 'string' ? r === 'staf_operasional' : r?.name === 'staf_operasional'));
-    const isQc = user.is_qc || roles.some((r: any) => (typeof r === 'string' ? r === 'admin_qc' : r?.name === 'admin_qc'));
 
-    if (isAdmin) return 'Admin Utama';
     if (isOwner) return 'Pemilik';
-    if (isStaf) return 'Staf Operasional';
-    if (isQc) return 'Admin QC';
-    return '';
+    return 'Admin Gudang';
 };
 
 const formatDateWithTime = (dateStr: string | null) => {

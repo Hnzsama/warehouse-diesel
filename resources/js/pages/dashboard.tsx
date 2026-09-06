@@ -115,20 +115,15 @@ export default function Dashboard({
 
     const isAdmin = Boolean(
         user.is_admin ||
-        user.roles?.some((r: any) => (typeof r === 'string' ? r === 'admin' : r?.name === 'admin'))
+        user.roles?.some((r: any) => (typeof r === 'string' ? r === 'admin' : r?.name === 'admin')) ||
+        !user.is_pemilik
     );
     const isOwner = Boolean(
         user.is_pemilik ||
         user.roles?.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'))
     );
-    const isStaf = Boolean(
-        user.is_staf ||
-        user.roles?.some((r: any) => (typeof r === 'string' ? r === 'staf_operasional' : r?.name === 'staf_operasional'))
-    );
-    const isQc = Boolean(
-        user.is_qc ||
-        user.roles?.some((r: any) => (typeof r === 'string' ? r === 'admin_qc' : r?.name === 'admin_qc'))
-    );
+    const isStaf = false;
+    const isQc = false;
 
     const [customStart, setCustomStart] = useState(startDate);
     const [customEnd, setCustomEnd] = useState(endDate);
@@ -155,7 +150,7 @@ export default function Dashboard({
 
     const excelExportUrl = `/reports/export-excel?period=${period}&start_date=${startDate || ''}&end_date=${endDate || ''}`;
 
-    const roleBadgeText = user.role_label || (isAdmin ? 'Admin Utama' : isOwner ? 'Pemilik (Owner)' : isStaf ? 'Staf Operasional' : isQc ? 'Admin QC' : 'Pengguna');
+    const roleBadgeText = user.role_label || (isOwner ? 'Pemilik (Owner)' : 'Admin Gudang');
 
     return (
         <>
@@ -177,10 +172,9 @@ export default function Dashboard({
                                     Selamat Datang, {user.name} 👋
                                 </h1>
                                 <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
-                                    {isStaf && 'Panel Pencatatan Transaksi Barang Masuk dan Barang Keluar Gudang Diesel Truk Medan.'}
-                                    {isQc && 'Panel Monitoring Kualitas Stok, Pemeriksaan Barang Rusak & Penyesuaian Opname Gudang.'}
-                                    {isOwner && 'Panel Monitoring & Laporan Executive Persediaan Gudang Diesel Truk Medan (Monitoring & Export Laporan).'}
-                                    {isAdmin && !isOwner && 'Panel Kendali Utama & Executive Monitoring Keseluruhan Stok Gudang Diesel Truk Medan.'}
+                                    {isOwner
+                                        ? 'Panel Monitoring & Laporan Executive Persediaan Gudang Diesel Truk Medan (Monitoring & Export Laporan).'
+                                        : 'Panel Kendali Utama Admin Gudang untuk Pencatatan Transaksi, Penyesuaian Stok, dan Kelola Master Data.'}
                                 </p>
                             </div>
 

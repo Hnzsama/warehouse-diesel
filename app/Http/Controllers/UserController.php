@@ -63,7 +63,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'string', Password::defaults()],
-            'role' => 'required|string|in:admin,staf_operasional,admin_qc,pemilik',
+            'role' => 'required|string|in:admin,pemilik',
         ]);
 
         try {
@@ -92,7 +92,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'password' => ['nullable', 'string', Password::defaults()],
-            'role' => 'required|string|in:admin,staf_operasional,admin_qc,pemilik',
+            'role' => 'required|string|in:admin,pemilik',
         ]);
 
         try {

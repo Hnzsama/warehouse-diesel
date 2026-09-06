@@ -33,8 +33,8 @@ class UserSeeder extends Seeder
         );
         $pemilikAlias->syncRoles(['pemilik']);
 
-        // 2 Admin Gudang Utama (Full Access)
-        $mainAdmins = [
+        // 2. Admin Gudang (Full Operational Access)
+        $warehouseAdmins = [
             [
                 'email' => 'admin@gudangdiesel.com',
                 'name' => 'Bagus Miftah Nur Haqqi',
@@ -43,21 +43,6 @@ class UserSeeder extends Seeder
                 'email' => 'masgo@gudangdiesel.com',
                 'name' => 'Masgo',
             ],
-        ];
-
-        foreach ($mainAdmins as $info) {
-            $user = User::firstOrCreate(
-                ['email' => $info['email']],
-                [
-                    'name' => $info['name'],
-                    'password' => Hash::make('password'),
-                ]
-            );
-            $user->syncRoles(['admin']);
-        }
-
-        // 4 Staf Operasional Gudang (Pencatatan Barang Masuk & Keluar)
-        $opStaff = [
             [
                 'email' => 'ilyas@gudangdiesel.com',
                 'name' => 'Muhammad Herie Ilyas Asfari',
@@ -74,21 +59,6 @@ class UserSeeder extends Seeder
                 'email' => 'vito@gudangdiesel.com',
                 'name' => 'Muhammad Vito Arya Apriza',
             ],
-        ];
-
-        foreach ($opStaff as $info) {
-            $user = User::firstOrCreate(
-                ['email' => $info['email']],
-                [
-                    'name' => $info['name'],
-                    'password' => Hash::make('password'),
-                ]
-            );
-            $user->syncRoles(['staf_operasional']);
-        }
-
-        // 3 Admin QC & Stock Opname (Pemeriksa Stok & Barang Rusak)
-        $qcStaff = [
             [
                 'email' => 'revo@gudangdiesel.com',
                 'name' => 'Revo Mulia Alamsyah Harahap',
@@ -103,7 +73,7 @@ class UserSeeder extends Seeder
             ],
         ];
 
-        foreach ($qcStaff as $info) {
+        foreach ($warehouseAdmins as $info) {
             $user = User::firstOrCreate(
                 ['email' => $info['email']],
                 [
@@ -111,7 +81,7 @@ class UserSeeder extends Seeder
                     'password' => Hash::make('password'),
                 ]
             );
-            $user->syncRoles(['admin_qc']);
+            $user->syncRoles(['admin']);
         }
     }
 }

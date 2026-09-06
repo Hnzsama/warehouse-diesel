@@ -35,34 +35,23 @@ export function AppSidebar() {
     const user = auth?.user;
     const isAdmin = Boolean(
         user?.is_admin ||
-        user?.roles?.some((r: any) => (typeof r === 'string' ? r === 'admin' : r?.name === 'admin'))
+        user?.roles?.some((r: any) => (typeof r === 'string' ? r === 'admin' : r?.name === 'admin')) ||
+        !user?.is_pemilik
     );
     const isOwner = Boolean(
         user?.is_pemilik ||
         user?.roles?.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'))
     );
-    const isStaf = Boolean(
-        user?.is_staf ||
-        user?.roles?.some((r: any) => (typeof r === 'string' ? r === 'staf_operasional' : r?.name === 'staf_operasional'))
-    );
-    const isQc = Boolean(
-        user?.is_qc ||
-        user?.roles?.some((r: any) => (typeof r === 'string' ? r === 'admin_qc' : r?.name === 'admin_qc'))
-    );
 
-    const hasMasterAccess = isAdmin || isOwner || isQc;
-    const hasTransactionAccess = isAdmin || isOwner || isStaf || isQc;
-    const hasReportAccess = isAdmin || isOwner || isQc;
+    const hasMasterAccess = true;
+    const hasTransactionAccess = true;
+    const hasReportAccess = true;
 
-    const roleBadgeText = user?.role_label || (isAdmin ? 'Admin Utama' : isOwner ? 'Pemilik (Owner)' : isStaf ? 'Staf Operasional' : isQc ? 'Admin QC' : 'Pengguna');
+    const roleBadgeText = user?.role_label || (isOwner ? 'Pemilik (Owner)' : 'Admin Gudang');
 
-    const badgeColorClass = isAdmin
-        ? 'bg-red-500/10 text-red-600 border-red-500/20 dark:text-red-400'
-        : isOwner
+    const badgeColorClass = isOwner
         ? 'bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400'
-        : isStaf
-        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400'
-        : 'bg-purple-500/10 text-purple-600 border-purple-500/20 dark:text-purple-400';
+        : 'bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400';
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -127,81 +116,75 @@ export function AppSidebar() {
                             Master Data
                         </SidebarGroupLabel>
                         <SidebarMenu>
-                            {(isAdmin || isOwner || isQc) && (
-                                <SidebarMenuItem>
-                                    <SidebarMenuButton
-                                        asChild
-                                        isActive={isCurrentUrl('/items')}
-                                        tooltip="Data Sparepart"
-                                        className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
-                                    >
-                                        <Link href="/items">
-                                            <Boxes className="h-4 w-4" />
-                                            <span>Data Sparepart</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            )}
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isCurrentUrl('/items')}
+                                    tooltip="Data Sparepart"
+                                    className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
+                                >
+                                    <Link href="/items">
+                                        <Boxes className="h-4 w-4" />
+                                        <span>Data Sparepart</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
 
-                            {(isAdmin || isOwner) && (
-                                <>
-                                    <SidebarMenuItem>
-                                        <SidebarMenuButton
-                                            asChild
-                                            isActive={isCurrentUrl('/categories')}
-                                            tooltip="Kategori Barang"
-                                            className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
-                                        >
-                                            <Link href="/categories">
-                                                <Tags className="h-4 w-4" />
-                                                <span>Kategori Barang</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isCurrentUrl('/categories')}
+                                    tooltip="Kategori Barang"
+                                    className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
+                                >
+                                    <Link href="/categories">
+                                        <Tags className="h-4 w-4" />
+                                        <span>Kategori Barang</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
 
-                                    <SidebarMenuItem>
-                                        <SidebarMenuButton
-                                            asChild
-                                            isActive={isCurrentUrl('/units')}
-                                            tooltip="Satuan Barang"
-                                            className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
-                                        >
-                                            <Link href="/units">
-                                                <Package className="h-4 w-4" />
-                                                <span>Satuan Barang</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isCurrentUrl('/units')}
+                                    tooltip="Satuan Barang"
+                                    className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
+                                >
+                                    <Link href="/units">
+                                        <Package className="h-4 w-4" />
+                                        <span>Satuan Barang</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
 
-                                    <SidebarMenuItem>
-                                        <SidebarMenuButton
-                                            asChild
-                                            isActive={isCurrentUrl('/suppliers')}
-                                            tooltip="Data Supplier"
-                                            className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
-                                        >
-                                            <Link href="/suppliers">
-                                                <Truck className="h-4 w-4 text-sky-500" />
-                                                <span>Data Supplier</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isCurrentUrl('/suppliers')}
+                                    tooltip="Data Supplier"
+                                    className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
+                                >
+                                    <Link href="/suppliers">
+                                        <Truck className="h-4 w-4 text-sky-500" />
+                                        <span>Data Supplier</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
 
-                                    <SidebarMenuItem>
-                                        <SidebarMenuButton
-                                            asChild
-                                            isActive={isCurrentUrl('/users')}
-                                            tooltip="Kelola Pengguna"
-                                            className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
-                                        >
-                                            <Link href="/users">
-                                                <UserCheck className="h-4 w-4" />
-                                                <span>Kelola Pengguna</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                </>
-                            )}
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isCurrentUrl('/users')}
+                                    tooltip="Kelola Pengguna"
+                                    className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
+                                >
+                                    <Link href="/users">
+                                        <UserCheck className="h-4 w-4" />
+                                        <span>Kelola Pengguna</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarGroup>
                 )}
@@ -213,53 +196,47 @@ export function AppSidebar() {
                             Transaksi Stok
                         </SidebarGroupLabel>
                         <SidebarMenu>
-                            {(isAdmin || isOwner || isStaf) && (
-                                <>
-                                    <SidebarMenuItem>
-                                        <SidebarMenuButton
-                                            asChild
-                                            isActive={isCurrentUrl('/incoming-items')}
-                                            tooltip="Barang Masuk"
-                                            className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
-                                        >
-                                            <Link href="/incoming-items">
-                                                <ArrowDownLeft className="h-4 w-4 text-emerald-500" />
-                                                <span>Barang Masuk</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isCurrentUrl('/incoming-items')}
+                                    tooltip="Barang Masuk"
+                                    className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
+                                >
+                                    <Link href="/incoming-items">
+                                        <ArrowDownLeft className="h-4 w-4 text-emerald-500" />
+                                        <span>Barang Masuk</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
 
-                                    <SidebarMenuItem>
-                                        <SidebarMenuButton
-                                            asChild
-                                            isActive={isCurrentUrl('/outgoing-items')}
-                                            tooltip="Barang Keluar"
-                                            className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
-                                        >
-                                            <Link href="/outgoing-items">
-                                                <ArrowUpRight className="h-4 w-4 text-amber-500" />
-                                                <span>Barang Keluar</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                </>
-                            )}
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isCurrentUrl('/outgoing-items')}
+                                    tooltip="Barang Keluar"
+                                    className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
+                                >
+                                    <Link href="/outgoing-items">
+                                        <ArrowUpRight className="h-4 w-4 text-amber-500" />
+                                        <span>Barang Keluar</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
 
-                            {(isAdmin || isOwner || isQc) && (
-                                <SidebarMenuItem>
-                                    <SidebarMenuButton
-                                        asChild
-                                        isActive={isCurrentUrl('/stock-adjustments')}
-                                        tooltip="Penyesuaian Stok (Opname)"
-                                        className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
-                                    >
-                                        <Link href="/stock-adjustments">
-                                            <SlidersHorizontal className="h-4 w-4 text-purple-500" />
-                                            <span>Penyesuaian Stok</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            )}
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isCurrentUrl('/stock-adjustments')}
+                                    tooltip="Penyesuaian Stok (Opname)"
+                                    className="rounded-lg font-medium text-sm gap-3 px-3 py-2.5 transition-colors"
+                                >
+                                    <Link href="/stock-adjustments">
+                                        <SlidersHorizontal className="h-4 w-4 text-purple-500" />
+                                        <span>Penyesuaian Stok</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarGroup>
                 )}

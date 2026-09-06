@@ -18,7 +18,7 @@ test('reference number generator creates unique sequential numbers', function ()
 
 test('authenticated user can record stock adjustment and item stock updates accordingly', function () {
     $user = User::factory()->create();
-    $user->assignRole('admin_qc');
+    $user->assignRole('admin');
     $category = Category::create(['name' => 'Mesin', 'slug' => 'mesin']);
     $unit = Unit::create(['name' => 'Pcs', 'short_name' => 'pcs']);
     $item = Item::create([

@@ -88,13 +88,11 @@ const getRoleBadge = (user?: any) => {
     const roles = user.roles || [];
     const isAdmin = roles.some((r: any) => (typeof r === 'string' ? r === 'admin' : r?.name === 'admin'));
     const isOwner = roles.some((r: any) => (typeof r === 'string' ? r === 'pemilik' : r?.name === 'pemilik'));
-    const isStaf = roles.some((r: any) => (typeof r === 'string' ? r === 'staf_operasional' : r?.name === 'staf_operasional'));
-    const isQc = roles.some((r: any) => (typeof r === 'string' ? r === 'admin_qc' : r?.name === 'admin_qc'));
 
     if (isAdmin) {
         return (
-            <Badge variant="outline" className="gap-1 whitespace-nowrap bg-red-500/10 text-red-600 border-red-500/20 font-bold dark:text-red-400">
-                <Shield className="h-3 w-3 text-red-500" />
+            <Badge variant="outline" className="gap-1 whitespace-nowrap bg-blue-500/10 text-blue-600 border-blue-500/20 font-bold dark:text-blue-400">
+                <Shield className="h-3 w-3 text-blue-500" />
                 <span>Admin Gudang</span>
             </Badge>
         );
@@ -107,26 +105,10 @@ const getRoleBadge = (user?: any) => {
             </Badge>
         );
     }
-    if (isStaf) {
-        return (
-            <Badge variant="outline" className="gap-1 whitespace-nowrap bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold dark:text-emerald-400">
-                <Shield className="h-3 w-3 text-emerald-500" />
-                <span>Staf Operasional</span>
-            </Badge>
-        );
-    }
-    if (isQc) {
-        return (
-            <Badge variant="outline" className="gap-1 whitespace-nowrap bg-purple-500/10 text-purple-600 border-purple-500/20 font-bold dark:text-purple-400">
-                <Shield className="h-3 w-3 text-purple-500" />
-                <span>Admin QC</span>
-            </Badge>
-        );
-    }
     return (
         <Badge variant="outline" className="gap-1 whitespace-nowrap bg-muted text-muted-foreground border-border font-medium">
             <Shield className="h-3 w-3" />
-            <span>Pengguna</span>
+            <span>Admin Gudang</span>
         </Badge>
     );
 };
@@ -165,7 +147,7 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
         name: '',
         email: '',
         password: '',
-        role: 'staf_operasional',
+        role: 'admin',
     });
 
     const handleSearch = (e: React.FormEvent) => {
@@ -183,7 +165,7 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
     const openEditModal = (u: UserItem) => {
         setEditingUser(u);
         clearErrors();
-        const primaryRole = u.roles && u.roles.length > 0 ? u.roles[0].name : 'staf_operasional';
+        const primaryRole = u.roles && u.roles.length > 0 ? u.roles[0].name : 'admin';
         setData({
             name: u.name,
             email: u.email,
@@ -235,7 +217,7 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
 
     return (
         <TooltipProvider>
-            <Head title="Manajemen Pengguna & Staf Gudang" />
+            <Head title="Manajemen Pengguna Gudang" />
 
             <div className="flex flex-1 flex-col gap-5 p-3 sm:p-4 md:p-6 w-full max-w-full overflow-hidden">
                 {/* Flash Messages */}
@@ -257,10 +239,10 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                     <div>
                         <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
                             <UserCheck className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
-                            <span>Manajemen Pengguna & Staf</span>
+                            <span>Manajemen Pengguna</span>
                         </h1>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                            Kelola akun pengguna, Admin Gudang, Staf Operasional, dan Admin QC. Klik baris untuk mengedit data pengguna.
+                            Kelola akun pengguna Admin Gudang dan Pemilik. Klik baris untuk mengedit data pengguna.
                         </p>
                     </div>
 
@@ -294,10 +276,8 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                                     className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
                                 >
                                     <option value="">-- Semua Peran Akses --</option>
-                                    <option value="admin">🔴 Admin Gudang</option>
-                                    <option value="staf_operasional">🟢 Staf Operasional</option>
-                                    <option value="admin_qc">🟣 Admin QC</option>
-                                    <option value="pemilik">🟡 Pemilik (Owner)</option>
+                                    <option value="admin">🔵 Admin Gudang</option>
+                                    <option value="pemilik">👑 Pemilik (Owner)</option>
                                 </select>
                             </div>
 
@@ -455,10 +435,8 @@ export default function UsersIndex({ users, roles, filters }: UsersIndexProps) {
                                     <SelectValue placeholder="Pilih Peran Akses" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="admin">🔴 Admin Gudang (Akses Penuh Operator & Sistem)</SelectItem>
-                                    <SelectItem value="staf_operasional">🟢 Staf Operasional (Barang Masuk & Keluar)</SelectItem>
-                                    <SelectItem value="admin_qc">🟣 Admin QC (Stok Opname & Barang Rusak)</SelectItem>
-                                    <SelectItem value="pemilik">🟡 Pemilik / Executive (Monitoring & Laporan)</SelectItem>
+                                    <SelectItem value="admin">🔵 Admin Gudang (Akses Penuh Operator & Sistem)</SelectItem>
+                                    <SelectItem value="pemilik">👑 Pemilik (Owner - Monitoring & Laporan)</SelectItem>
                                 </SelectContent>
                             </Select>
                             {errors.role && <p className="mt-1 text-xs text-destructive">{errors.role}</p>}

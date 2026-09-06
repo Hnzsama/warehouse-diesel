@@ -20,32 +20,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard (Semua Peran / Role)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Transaksi Barang Masuk (Index & Export untuk Admin, Pemilik, & Staf Operasional)
-    Route::get('/incoming-items', [IncomingItemController::class, 'index'])->middleware('role:admin|pemilik|staf_operasional')->name('incoming-items.index');
-    Route::middleware(['role:admin|staf_operasional'])->group(function () {
+    // Transaksi Barang Masuk (Index untuk Admin & Pemilik)
+    Route::get('/incoming-items', [IncomingItemController::class, 'index'])->middleware('role:admin|pemilik')->name('incoming-items.index');
+    Route::middleware(['role:admin'])->group(function () {
         Route::post('/incoming-items', [IncomingItemController::class, 'store'])->name('incoming-items.store');
         Route::put('/incoming-items/{incoming_item}', [IncomingItemController::class, 'update'])->name('incoming-items.update');
         Route::delete('/incoming-items/{incoming_item}', [IncomingItemController::class, 'destroy'])->name('incoming-items.destroy');
     });
 
-    // Transaksi Barang Keluar (Index & Export untuk Admin, Pemilik, & Staf Operasional)
-    Route::get('/outgoing-items', [OutgoingItemController::class, 'index'])->middleware('role:admin|pemilik|staf_operasional')->name('outgoing-items.index');
-    Route::middleware(['role:admin|staf_operasional'])->group(function () {
+    // Transaksi Barang Keluar (Index untuk Admin & Pemilik)
+    Route::get('/outgoing-items', [OutgoingItemController::class, 'index'])->middleware('role:admin|pemilik')->name('outgoing-items.index');
+    Route::middleware(['role:admin'])->group(function () {
         Route::post('/outgoing-items', [OutgoingItemController::class, 'store'])->name('outgoing-items.store');
         Route::put('/outgoing-items/{outgoing_item}', [OutgoingItemController::class, 'update'])->name('outgoing-items.update');
         Route::delete('/outgoing-items/{outgoing_item}', [OutgoingItemController::class, 'destroy'])->name('outgoing-items.destroy');
     });
 
-    // Penyesuaian Stok (Index untuk Admin, Pemilik, & Admin QC)
-    Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])->middleware('role:admin|pemilik|admin_qc')->name('stock-adjustments.index');
-    Route::middleware(['role:admin|admin_qc'])->group(function () {
+    // Penyesuaian Stok (Index untuk Admin & Pemilik)
+    Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])->middleware('role:admin|pemilik')->name('stock-adjustments.index');
+    Route::middleware(['role:admin'])->group(function () {
         Route::post('/stock-adjustments', [StockAdjustmentController::class, 'store'])->name('stock-adjustments.store');
         Route::delete('/stock-adjustments/{stock_adjustment}', [StockAdjustmentController::class, 'destroy'])->name('stock-adjustments.destroy');
     });
 
-    // Master Sparepart Index (Admin Utama, Pemilik, & Admin QC)
-    Route::get('/items', [ItemController::class, 'index'])->middleware('role:admin|pemilik|admin_qc')->name('items.index');
-    Route::middleware(['role:admin|admin_qc'])->group(function () {
+    // Master Sparepart Index (Admin & Pemilik)
+    Route::get('/items', [ItemController::class, 'index'])->middleware('role:admin|pemilik')->name('items.index');
+    Route::middleware(['role:admin'])->group(function () {
         Route::post('/items', [ItemController::class, 'store'])->name('items.store');
         Route::put('/items/{item}', [ItemController::class, 'update'])->name('items.update');
         Route::delete('/items/{item}', [ItemController::class, 'destroy'])->name('items.destroy');
@@ -62,7 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
     });
 
-    // Master Data Mutation (Admin Utama saja)
+    // Master Data Mutation (Admin Gudang saja)
     Route::middleware(['role:admin'])->group(function () {
         Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
         Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
@@ -81,8 +81,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     });
 
-    // Laporan Persediaan (Admin Utama, Pemilik, & Admin QC)
-    Route::middleware(['role:admin|pemilik|admin_qc'])->group(function () {
+    // Laporan Persediaan (Admin Gudang & Pemilik)
+    Route::middleware(['role:admin|pemilik'])->group(function () {
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export-pdf');
         Route::get('/reports/print', [ReportController::class, 'exportPdf'])->name('reports.print');

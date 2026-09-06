@@ -14,7 +14,5 @@ class RoleSeeder extends Seeder
     {
         Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         Role::firstOrCreate(['name' => 'pemilik', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'staf_operasional', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'admin_qc', 'guard_name' => 'web']);
     }
 }
