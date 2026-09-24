@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => {
             tailwindcss(),
             wayfinder({
                 formVariants: true,
-                command: process.env.WAYFINDER_COMMAND || 'php8.5 artisan wayfinder:generate',
+                command: process.env.WAYFINDER_COMMAND || (isProduction ? 'echo "Wayfinder routes ready"' : 'php artisan wayfinder:generate'),
             }),
         ]),
         build: {
