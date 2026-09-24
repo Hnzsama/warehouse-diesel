@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panduan Manajerial — Pemilik (Owner)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>body { font-family: "Inter", sans-serif; }</style>
+</head>
+<body class="bg-slate-950 text-slate-100 p-6 max-w-4xl mx-auto space-y-6">
+  <header class="border-b border-slate-800 pb-4 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+        <i class="fa-solid fa-crown text-amber-400"></i> Panduan Manajerial — Pemilik (Owner)
+      </h1>
+      <p class="text-xs text-slate-400 mt-1">Sistem Informasi Manajemen Stok Barang Gudang Diesel Truk Medan</p>
+    </div>
+    <a href="index.html" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white">
+      <i class="fa-solid fa-arrow-left"></i> Kembali ke Docs
+    </a>
+  </header>
+
+  <section class="space-y-4 text-xs">
+    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+      <h2 class="text-sm font-bold text-amber-400">1. Pengelolaan Akun Pengguna / Admin Gudang</h2>
+      <p class="text-slate-300">Pemilik bertugas mengelola akun pengguna dan admin gudang pada menu <code>/users</code> (tambah, edit role, dan hapus akun staf).</p>
+    </div>
+
+    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+      <h2 class="text-sm font-bold text-amber-400">2. Dashboard Monitoring & Safety Stock Alert</h2>
+      <p class="text-slate-300">Memantau statistik total stok, tren mutasi barang masuk/keluar melalui grafik Area Chart, serta menerima peringatan dini untuk item barang dengan stok kritis (<code>min_stock</code>).</p>
+    </div>
+
+    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+      <h2 class="text-sm font-bold text-amber-400">3. Meninjau & Mengunduh Laporan Persediaan</h2>
+      <p class="text-slate-300">Pemilik dapat meninjau seluruh laporan transaksi dan mendownload laporan dalam format PDF atau Excel secara instan per periode tanggal yang diinginkan.</p>
+    </div>
+
+    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2 border-l-4 border-amber-500">
+      <h2 class="text-sm font-bold text-amber-400">4. Proteksi Integrity Constraint (Read-Only Transaksi)</h2>
+      <p class="text-slate-300">Demi menjaga akuntabilitas operasional gudang, akun Pemilik **dibatasi dari menginput/mengubah** transaksi mutasi barang dan master data operasional secara langsung.</p>
+    </div>
+  </section>
+</body>
+</html>

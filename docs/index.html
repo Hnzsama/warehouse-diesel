@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dokumentasi SIM Stok Gudang Diesel Truk Medan</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: "#f0f9ff",
+              100: "#e0f2fe",
+              500: "#0284c7",
+              600: "#0369a1",
+              700: "#075985",
+              900: "#0c4a6e"
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Marked.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Mermaid.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    body { font-family: "Inter", sans-serif; }
+    
+    /* Markdown Styles */
+    .prose h1 { font-size: 1.75rem; font-weight: 700; color: inherit; margin-top: 1.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(148,163,184,0.2); padding-bottom: 0.5rem; }
+    .prose h2 { font-size: 1.35rem; font-weight: 600; color: inherit; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(148,163,184,0.15); padding-bottom: 0.25rem; }
+    .prose h3 { font-size: 1.15rem; font-weight: 600; color: inherit; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    .prose p { color: inherit; line-height: 1.7; margin-top: 0.75rem; margin-bottom: 0.75rem; font-size: 0.95rem; opacity: 0.9; }
+    .prose ul { list-style-type: disc; list-style-position: inside; margin-top: 0.75rem; margin-bottom: 0.75rem; padding-left: 0.5rem; opacity: 0.9; }
+    .prose ol { list-style-type: decimal; list-style-position: inside; margin-top: 0.75rem; margin-bottom: 0.75rem; padding-left: 0.5rem; opacity: 0.9; }
+    .prose code { font-family: monospace; font-size: 0.875rem; background-color: rgba(2,132,199,0.15); color: #38bdf8; padding: 0.15rem 0.4rem; border-radius: 0.25rem; }
+    .prose pre { background-color: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 0.75rem; overflow-x: auto; margin-top: 1rem; margin-bottom: 1rem; font-size: 0.875rem; font-family: monospace; }
+    .prose pre code { background-color: transparent; color: inherit; padding: 0; }
+    .prose blockquote { border-left: 4px solid #0284c7; background-color: rgba(2,132,199,0.08); padding: 0.75rem 1rem; margin-top: 1rem; margin-bottom: 1rem; border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; font-style: italic; }
+    .prose table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; margin-bottom: 1.5rem; font-size: 0.875rem; text-align: left; }
+    .prose th { background-color: rgba(148,163,184,0.15); font-weight: 600; padding: 0.75rem; border: 1px solid rgba(148,163,184,0.25); }
+    .prose td { padding: 0.75rem; border: 1px solid rgba(148,163,184,0.2); }
+
+    /* Crisp & Scrollable Mermaid Container */
+    .mermaid-wrapper {
+      background: #ffffff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin: 1.75rem 0;
+      border: 1px solid rgba(148,163,184,0.25);
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      width: 100%;
+    }
+    .dark .mermaid-wrapper {
+      background: #0f172a;
+      border-color: rgba(148,163,184,0.12);
+    }
+    .mermaid-wrapper .mermaid {
+      min-width: 100%;
+      width: max-content;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+    }
+    .mermaid-wrapper svg {
+      height: auto !important;
+      font-family: 'Inter', sans-serif !important;
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+    .dark ::-webkit-scrollbar-thumb { background: #334155; }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- Header Top Bar -->
+  <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 lg:px-8 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <button id="mobile-menu-btn" class="lg:hidden text-slate-600 dark:text-slate-300 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+        <i class="fa-solid fa-bars text-lg"></i>
+      </button>
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 font-bold text-lg">
+          🚚
+        </div>
+        <div>
+          <h1 class="font-bold text-slate-900 dark:text-white text-base leading-tight">Gudang Diesel Truk Medan</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Documentation Center & Skripsi Checklist</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Guide Navigation & Theme Switcher -->
+    <div class="flex items-center gap-3">
+      <nav class="hidden md:flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl text-xs font-semibold">
+        <a href="admin.html" class="px-2.5 py-1 rounded-lg text-slate-700 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 hover:bg-white dark:hover:bg-slate-900 transition-all flex items-center gap-1">
+          <span>🛠️</span> Admin Gudang
+        </a>
+        <a href="owner.html" class="px-2.5 py-1 rounded-lg text-slate-700 dark:text-slate-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-slate-900 transition-all flex items-center gap-1">
+          <span>👑</span> Pemilik (Owner)
+        </a>
+      </nav>
+
+      <div class="relative hidden sm:block w-48 lg:w-64">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" id="search-input" placeholder="Cari dokumen..." class="w-full bg-slate-100 dark:bg-slate-800 text-xs pl-8 pr-4 py-2 rounded-lg border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all">
+      </div>
+
+      <button id="theme-toggle" class="p-2 w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-sky-500 transition-colors flex items-center justify-center">
+        <i id="theme-icon" class="fa-solid fa-moon"></i>
+      </button>
+
+      <a href="https://github.com" target="_blank" class="hidden md:flex items-center gap-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors shadow-sm">
+        <i class="fa-brands fa-github text-sm"></i>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <div class="flex-1 flex max-w-[1600px] w-full mx-auto relative">
+    
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed lg:sticky top-[61px] left-0 z-50 lg:z-10 w-72 h-[calc(100vh-61px)] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
+      
+      <div class="p-3 border-b border-slate-100 dark:border-slate-800/80 sm:hidden">
+        <input type="text" id="mobile-search-input" placeholder="Cari dokumen..." class="w-full bg-slate-100 dark:bg-slate-800 text-xs px-3 py-2 rounded-lg outline-none">
+      </div>
+
+      <!-- Quick User Guides Section -->
+      <div class="p-3 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+        <div class="px-1 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase flex items-center justify-between">
+          <span>📖 Panduan Pengguna</span>
+          <span class="text-emerald-500 font-semibold">User Guides</span>
+        </div>
+        <div class="space-y-1 text-xs">
+          <a href="admin.html" class="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-800/80 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-slate-800 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200/60 dark:border-slate-700/60 transition-all font-medium">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-boxes-packing text-sky-500"></i> Admin Gudang</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+          </a>
+          <a href="owner.html" class="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-800/80 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-slate-800 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 border border-slate-200/60 dark:border-slate-700/60 transition-all font-medium">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-crown text-amber-500"></i> Pemilik (Owner)</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="px-4 py-3 flex items-center justify-between text-xs font-semibold text-slate-400 dark:text-slate-500 tracking-wider uppercase">
+        <span>Dokumen Skripsi (4)</span>
+        <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-bold">100% DONE</span>
+      </div>
+
+      <nav id="doc-nav" class="flex-1 overflow-y-auto px-2 pb-6 space-y-1">
+        <!-- Document links populated by JS -->
+      </nav>
+
+      <div class="p-4 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 text-center">
+        Gudang Diesel Truk Medan &copy; 2026
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-10 max-w-5xl">
+      <div id="doc-header" class="mb-6 pb-4 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span id="current-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900">
+            <i class="fa-regular fa-file-lines"></i>
+            <span id="current-filename">00-project-overview.md</span>
+          </span>
+          <h2 id="current-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-2">Loading...</h2>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="copy-markdown-btn" class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors flex items-center gap-1.5 font-medium">
+            <i class="fa-regular fa-copy"></i>
+            <span>Salin Raw</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Rendered Markdown Container -->
+      <article id="markdown-container" class="prose max-w-none">
+        <!-- Rendered Content -->
+      </article>
+
+      <!-- Bottom Page Navigator -->
+      <footer class="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+        <button id="prev-btn" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-30 disabled:pointer-events-none">
+          <i class="fa-solid fa-chevron-left"></i>
+          <span id="prev-label">Sebelumnya</span>
+        </button>
+        <button id="next-btn" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shadow-md shadow-sky-500/20 disabled:opacity-30 disabled:pointer-events-none">
+          <span id="next-label">Selanjutnya</span>
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const docsData = {
+      "00-project-overview.md": `# 00. Project Overview — Gudang Diesel Truk Medan\n\n## Project Metadata\n\n- **Nama Proyek:** Sistem Informasi Manajemen Stok Barang Gudang Diesel Truk Medan\n- **Judul Skripsi:** Pengembangan Sistem Informasi Manajemen Stok Barang Menggunakan Metode Prototype pada Gudang Diesel Truk Medan\n- **Peneliti:** Jojor Maruba Hutabarat (NIM: 22100052)\n- **Program Studi:** Sistem Informasi, Fakultas Sains dan Teknologi, ITB Indonesia (Deli Serdang)\n- **Lokasi Objek:** Gudang Diesel Truk Medan (Sinar Diesel Truck - Pulo Brayan Bengkel, Medan)\n- **Metode Pengembangan:** Prototype\n\n---\n\n## Primary Objective\n\nMembangun website Sistem Informasi Manajemen Stok Barang berbasis Modern Monolith (Laravel 13 + React 19 + Inertia v3) yang memperlihatkan alur:\n\n\`\`\`\nAdmin Gudang / Pemilik\n➔ Login / Auth\n➔ Dashboard Monitoring (Real-time Stock & Safety Stock Alert)\n➔ Master Data (Sparepart, Kategori, Satuan, Supplier)\n➔ Input Barang Masuk (Auto-increment Stok)\n➔ Input Barang Keluar (Auto-decrement Stok & Proteksi Stok Minus)\n➔ Stock Opname (Penyesuaian Stok Rusak/Hilang)\n➔ Laporan Persediaan (Cetak, PDF, Excel)\n\`\`\`\n\n---\n\n## Key Status & Verification Result\n\n- **Compliance Rate:** **100% COMPLETE (21/21 Requirements Selesai)**\n- **Automated Test Suite:** **48 Passed / 0 Failed** (Pest PHP Unit & Feature Tests)\n- **Codebase Stack:** Laravel 13, PHP 8.5, React 19, Tailwind CSS v4, Inertia.js v3, Fortify, Spatie Permission.`,
+      "01-scope.md": `# 01. Project Scope — Gudang Diesel Truk Medan\n\n## 1. Informasi Proyek\n\n**Nama Proyek:** SIM Stok Gudang Diesel Truk Medan  \n**Referensi:** Proposal Skripsi Jojor Maruba Hutabarat (22100052) — ITB Indonesia  \n**Kapasitas Gudang:** ±50 jenis suku cadang / sparepart dengan total ±2.000 unit barang.  \n\nDokumen ini menjadi **batas utama pengembangan proyek**.\n\n---\n\n## 2. Tujuan Proyek\n\nMengotomatisasi pencatatan transaksi persediaan barang berbasis web untuk menggantikan buku pencatatan manual, memantau persediaan secara real-time, meminimalisasi selisih data stok fisik vs buku, serta mempercepat penyusunan laporan persediaan dari hitungan hari menjadi detik.\n\n---\n\n## 3. Aktor Sistem\n\nSistem memiliki 2 aktor utama berbasis **Spatie Role-Based Access Control (RBAC)**:\n\n### 3.1 Admin Gudang (Operational Access)\n- Login / logout akun.\n- Mengelola Master Data Sparepart, Kategori, Satuan, dan Supplier.\n- Menginput transaksi **Barang Masuk** (Auto-increment stok).\n- Menginput transaksi **Barang Keluar** (Auto-decrement + Proteksi Stok Minus).\n- Melakukan **Stock Opname** (Penyesuaian stok akibat barang rusak/hilang).\n- Memantau Dashboard Monitoring & Safety Stock Alert.\n- Meninjau, mencetak, dan mengunduh Laporan Persediaan.\n\n### 3.2 Pemilik / Owner (Managerial & Monitoring Access)\n- Login / logout akun.\n- Mengelola akun pengguna / admin gudang (\`/users\`).\n- Memantau statistik persediaan & grafik mutasi pada Dashboard Monitoring.\n- Meninjau, mencetak, serta mengunduh Laporan Persediaan (PDF & Excel).\n- *Catatan Constraint:* Owner **tidak diizinkan** menginput/mengubah transaksi mutasi barang dan master data operasional guna menjaga integritas data.\n\n---\n\n## 4. Scope Diagram Alur Transaksi\n\n\`\`\`mermaid\nflowchart TD\n    subgraph Operational[\"Admin Gudang Operasional\"]\n        A1[\"Input Barang Masuk\"] -->|\"Auto-increment\"| B[\"Stok Item Bertambah\"]\n        A2[\"Input Barang Keluar\"] -->|\"Validation: Out <= Stock\"| C[\"Stok Item Berkurang\"]\n        A3[\"Stock Opname\"] -->|\"Adjustment\"| D[\"Stok Fisik & Sistem Sinkron\"]\n    end\n\n    subgraph Managerial[\"Pemilik / Owner Monitoring\"]\n        M1[\"Kelola User / Admin\"] --> U[\"Akses User Controlled\"]\n        M2[\"Monitoring Dashboard\"] --> S[\"Safety Stock Alert (min_stock)\"]\n        M3[\"Unduh Laporan\"] --> R[\"PDF & Excel Instant\"]\n    end\n\`\`\``,
+      "02-requirements.md": `# 02. Functional & Non-Functional Requirements\n\n## 1. Functional Requirements (FR)\n\n### 1.1 Modul Master Data (Sparepart & Reference)\n- **FR-MST-01:** Admin dapat mengelola Master Data Sparepart (kode barang, nama barang, lokasi rak, stok awal, stok minimum).\n- **FR-MST-02:** Admin dapat mengelola Kategori Barang, Satuan Unit (cth: Pcs, Set, Dus), dan Supplier.\n- **FR-MST-03:** Sistem menggunakan Soft Deletes (\`deleted_at\`) untuk seluruh master data.\n\n### 1.2 Modul Transaksi & Stock Opname\n- **FR-TRX-01:** Admin dapat menginput Barang Masuk dari Supplier yang secara otomatis **menambah stok**.\n- **FR-TRX-02:** Admin dapat menginput Barang Keluar untuk mekanik/truk yang secara otomatis **mengurangi stok**.\n- **FR-TRX-03 (Proteksi Stok Minus):** Transaksi barang keluar wajib menolak pengeluaran jika Jumlah Keluar > Stok Sisa.\n- **FR-TRX-04 (Stock Opname):** Admin dapat menyesuaikan selisih stok fisik vs sistem akibat barang rusak/hilang.\n\n### 1.3 Modul User Management & RBAC\n- **FR-USR-01:** Pemilik (Owner) & Admin Gudang dapat mengelola akun pengguna (\`GET\`, \`POST\`, \`PUT\`, \`DELETE /users\`).\n- **FR-USR-02:** Pemilik tidak dapat diakseskan ke route mutasi barang/master data operasional (*Read-Only*).\n\n### 1.4 Modul Laporan & Dashboard\n- **FR-REP-01:** Dashboard menampilkan total stok, mutasi barang, Area Chart (\`recharts\`), dan *Safety Stock Alert* (\`min_stock\`).\n- **FR-REP-02:** Sistem dapat mencetak (Print), mengunduh PDF (DomPDF), dan Excel (PhpSpreadsheet) laporan persediaan.\n\n---\n\n## 2. Requirement Verification Matrix (21/21 Checklist Selesai)\n\n\`\`\`mermaid\npie title Status Pemenuhan Requirements Skripsi (100%)\n    \"SUDAH Terlaksana (21)\" : 21\n    \"BELUM Terlaksana (0)\" : 0\n\`\`\`\n\n| No | Requirement Skripsi | Status | Verified Code Location |\n|:---:|:---|:---:|:---|\n| 1 | Pencatatan Otomatis & Real-Time | [x] SUDAH | Inertia.js v3 + React 19 SPA |\n| 2 | Pencegahan Mismatch Stok | [x] SUDAH | Transactional Atomicity Eloquent |\n| 3 | Penyusunan Laporan Instan | [x] SUDAH | ReportController (DomPDF & Excel) |\n| 4 | Metodologi Prototype & Flow UX | [x] SUDAH | Pest Automated Tests (48 Passed) |\n| 5 | Tech Stack Backend: Laravel 13 (PHP 8.5) | [x] SUDAH | \`laravel/framework ^13.17\` |\n| 6 | Tech Stack Frontend: React 19 + Tailwind v4 | [x] SUDAH | \`resources/js/pages/*.tsx\` |\n| 7 | Bridge Library: Inertia.js v3 | [x] SUDAH | \`@inertiajs/react ^3.0\` |\n| 8 | Database: MySQL 8.0 & Eloquent ORM | [x] SUDAH | \`database/migrations/*.php\` |\n| 9 | Auth & RBAC: Fortify + Spatie RBAC | [x] SUDAH | \`spatie/laravel-permission\` |\n| 10 | Hak Akses Admin Gudang (Operational) | [x] SUDAH | Middleware \`role:admin\` |\n| 11 | Hak Akses Pemilik / Owner (Managerial) | [x] SUDAH | Middleware \`role:admin\\|pemilik\` di \`/users\` |\n| 12 | Proteksi Read-Only Transaksi Owner | [x] SUDAH | Route Middleware Intercept |\n| 13 | Dashboard Monitoring & Chart | [x] SUDAH | \`resources/js/pages/dashboard.tsx\` |\n| 14 | Safety Stock Alert (\`min_stock\`) | [x] SUDAH | \`min_stock\` Alert Badge |\n| 15 | Pengelolaan Master Data | [x] SUDAH | Item, Category, Unit, Supplier Controllers |\n| 16 | Barang Masuk (Auto-increment) | [x] SUDAH | IncomingItemController@store |\n| 17 | Barang Keluar (Auto-decrement) | [x] SUDAH | OutgoingItemController@store |\n| 18 | Proteksi Stok Minus | [x] SUDAH | Validation in OutgoingItemController |\n| 19 | Stock Opname / Penyesuaian Stok | [x] SUDAH | StockAdjustmentController |\n| 20 | Laporan PDF, Excel, & Print | [x] SUDAH | ReportController PDF/Excel Export |\n| 21 | Pengujian Black-Box & Automated Test | [x] SUDAH | \`tests/Feature/*.php\` (48 Passed) |`,
+      "03-user-roles.md": `# 03. Aktor & Hak Akses Pengguna (Role-Based Access Control)\n\n---\n\n## Matriks Hak Akses (RBAC)\n\n| Akses Modul | Admin Gudang (Operational) | Pemilik / Owner (Managerial) | Keterangan & Proteksi |\n| :--- | :---: | :---: | :--- |\n| **Master Data Sparepart, Kategori, Satuan, Supplier** | Full CRUD | Read-Only (View) | Owner tidak boleh mengubah master data operasional |\n| **Transaksi Barang Masuk** | Input & Edit | Read-Only (View) | Auto-increment stok saat transaksi disimpan |\n| **Transaksi Barang Keluar** | Input & Edit | Read-Only (View) | Dilengkapi Proteksi Stok Minus |\n| **Stock Opname / Penyesuaian** | Input & Adjust | Read-Only (View) | Dokumentasi selisih stok rusak/hilang |\n| **Kelola Akun Pengguna (\`/users\`)** | Full Access | Full Access | Pemilik & Admin dapat mengelola akun staf |\n| **Dashboard & Safety Stock Alert** | View | View | Statistik real-time & grafik mutasi |\n| **Laporan Persediaan (PDF, Excel, Print)** | View & Export | View & Export | Ekspor instan per periode tanggal |`
+    };
+
+    const filenames = Object.keys(docsData).sort();
+
+    const docIcons = {
+      "00-project-overview.md": "fa-compass",
+      "01-scope.md": "fa-bullseye",
+      "02-requirements.md": "fa-list-check",
+      "03-user-roles.md": "fa-user-shield"
+    };
+
+    let currentFile = filenames[0];
+
+    const themeToggleBtn = document.getElementById("theme-toggle");
+    const themeIcon = document.getElementById("theme-icon");
+    
+    function initTheme() {
+      if (localStorage.theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        themeIcon.className = 'fa-solid fa-sun';
+      } else {
+        document.documentElement.classList.add('dark');
+        themeIcon.className = 'fa-solid fa-moon';
+      }
+    }
+
+    themeToggleBtn.addEventListener("click", () => {
+      if (document.documentElement.classList.contains("dark")) {
+        document.documentElement.classList.remove("dark");
+        localStorage.theme = "light";
+        themeIcon.className = "fa-solid fa-sun";
+      } else {
+        document.documentElement.classList.add("dark");
+        localStorage.theme = "dark";
+        themeIcon.className = "fa-solid fa-moon";
+      }
+      renderMermaid();
+    });
+
+    initTheme();
+
+    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+    const sidebar = document.getElementById("sidebar");
+    const backdrop = document.getElementById("sidebar-backdrop");
+
+    function toggleMobileMenu() {
+      sidebar.classList.toggle("-translate-x-full");
+      backdrop.classList.toggle("hidden");
+    }
+
+    mobileMenuBtn.addEventListener("click", toggleMobileMenu);
+    backdrop.addEventListener("click", toggleMobileMenu);
+
+    function formatTitle(filename) {
+      const nameWithoutExt = filename.replace(".md", "");
+      const parts = nameWithoutExt.split("-");
+      const num = parts[0];
+      const title = parts.slice(1).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+      return { num, title };
+    }
+
+    const navContainer = document.getElementById("doc-nav");
+    
+    function renderNav(filter = "") {
+      navContainer.innerHTML = "";
+      filenames.forEach(fn => {
+        const { num, title } = formatTitle(fn);
+        if (filter && !title.toLowerCase().includes(filter.toLowerCase()) && !fn.includes(filter.toLowerCase())) {
+          return;
+        }
+
+        const btn = document.createElement("button");
+        const isActive = fn === currentFile;
+        const iconClass = docIcons[fn] || "fa-file";
+
+        btn.className = `w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition-all ${
+          isActive 
+            ? "bg-sky-600 text-white shadow-md shadow-sky-500/20 font-semibold" 
+            : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70"
+        }`;
+
+        btn.innerHTML = `
+          <i class="fa-solid ${iconClass} text-sm ${isActive ? "text-white" : "text-slate-400 dark:text-slate-500"}"></i>
+          <span class="truncate flex-1">${num}. ${title}</span>
+        `;
+
+        btn.addEventListener("click", () => {
+          window.location.hash = fn;
+          if (!sidebar.classList.contains("-translate-x-full")) {
+            toggleMobileMenu();
+          }
+        });
+
+        navContainer.appendChild(btn);
+      });
+    }
+
+    function renderDoc(filename) {
+      if (!docsData[filename]) filename = filenames[0];
+      currentFile = filename;
+
+      const { num, title } = formatTitle(filename);
+      document.getElementById("current-filename").innerText = filename;
+      document.getElementById("current-title").innerText = `${num}. ${title}`;
+
+      const rawMd = docsData[filename];
+      const htmlContent = marked.parse(rawMd);
+
+      const container = document.getElementById("markdown-container");
+      container.innerHTML = htmlContent;
+
+      // Transform <pre><code class="language-mermaid"> into <div class="mermaid-wrapper"><div class="mermaid">
+      container.querySelectorAll('pre code.language-mermaid, pre code.lang-mermaid').forEach((block) => {
+        const pre = block.parentElement;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mermaid-wrapper';
+        
+        const innerDiv = document.createElement('div');
+        innerDiv.className = 'mermaid';
+        innerDiv.textContent = block.textContent;
+        
+        wrapper.appendChild(innerDiv);
+        pre.replaceWith(wrapper);
+      });
+
+      renderMermaid();
+      renderNav();
+      updatePagination();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderMermaid() {
+      setTimeout(() => {
+        const isDark = document.documentElement.classList.contains("dark");
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: isDark ? "dark" : "default",
+          securityLevel: "loose",
+          fontFamily: "Inter, sans-serif",
+          flowchart: { useMaxWidth: true, htmlLabels: true },
+          sequence: { useMaxWidth: true, showSequenceNumbers: true }
+        });
+
+        document.querySelectorAll(".mermaid").forEach((el) => {
+          const code = el.getAttribute("data-raw") || el.textContent;
+          el.setAttribute("data-raw", code);
+          el.removeAttribute("data-processed");
+          el.innerHTML = code;
+          
+          try {
+            mermaid.run({ nodes: [el] });
+          } catch(e) {
+            console.error("Mermaid error:", e);
+          }
+        });
+      }, 50);
+    }
+
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const prevLabel = document.getElementById("prev-label");
+    const nextLabel = document.getElementById("next-label");
+
+    function updatePagination() {
+      const idx = filenames.indexOf(currentFile);
+      
+      if (idx > 0) {
+        prevBtn.disabled = false;
+        const prevFn = filenames[idx - 1];
+        const { title } = formatTitle(prevFn);
+        prevLabel.innerText = title;
+        prevBtn.onclick = () => window.location.hash = prevFn;
+      } else {
+        prevBtn.disabled = true;
+        prevLabel.innerText = "Sebelumnya";
+      }
+
+      if (idx < filenames.length - 1) {
+        nextBtn.disabled = false;
+        const nextFn = filenames[idx + 1];
+        const { title } = formatTitle(nextFn);
+        nextLabel.innerText = title;
+        nextBtn.onclick = () => window.location.hash = nextFn;
+      } else {
+        nextBtn.disabled = true;
+        nextLabel.innerText = "Selanjutnya";
+      }
+    }
+
+    document.getElementById("search-input").addEventListener("input", (e) => {
+      renderNav(e.target.value);
+    });
+    document.getElementById("mobile-search-input").addEventListener("input", (e) => {
+      renderNav(e.target.value);
+    });
+
+    document.getElementById("copy-markdown-btn").addEventListener("click", () => {
+      navigator.clipboard.writeText(docsData[currentFile]);
+      const btn = document.getElementById("copy-markdown-btn");
+      btn.innerHTML = `<i class="fa-solid fa-check text-emerald-500"></i><span>Tersalin!</span>`;
+      setTimeout(() => {
+        btn.innerHTML = `<i class="fa-regular fa-copy"></i><span>Salin Raw</span>`;
+      }, 2000);
+    });
+
+    window.addEventListener("hashchange", () => {
+      const hash = window.location.hash.replace("#", "");
+      if (filenames.includes(hash)) {
+        renderDoc(hash);
+      }
+    });
+
+    const initialHash = window.location.hash.replace("#", "");
+    if (filenames.includes(initialHash)) {
+      renderDoc(initialHash);
+    } else {
+      renderDoc(filenames[0]);
+    }
+  </script>
+</body>
+</html>

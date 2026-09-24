@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panduan Operasional — Admin Gudang</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>body { font-family: "Inter", sans-serif; }</style>
+</head>
+<body class="bg-slate-950 text-slate-100 p-6 max-w-4xl mx-auto space-y-6">
+  <header class="border-b border-slate-800 pb-4 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+        <i class="fa-solid fa-boxes-packing text-sky-400"></i> Panduan Operasional — Admin Gudang
+      </h1>
+      <p class="text-xs text-slate-400 mt-1">Sistem Informasi Manajemen Stok Barang Gudang Diesel Truk Medan</p>
+    </div>
+    <a href="index.html" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white">
+      <i class="fa-solid fa-arrow-left"></i> Kembali ke Docs
+    </a>
+  </header>
+
+  <section class="space-y-4 text-xs">
+    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+      <h2 class="text-sm font-bold text-sky-400">1. Pengelolaan Master Data Sparepart</h2>
+      <p class="text-slate-300">Admin memiliki akses penuh untuk menambah, mengedit, dan menghapus master data suku cadang (kode barang, nama barang, lokasi rak, stok awal, dan stok minimum).</p>
+    </div>
+
+    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+      <h2 class="text-sm font-bold text-sky-400">2. Input Transaksi Barang Masuk</h2>
+      <p class="text-slate-300">Pilih supplier dan item barang yang diterima. Setelah disimpan, jumlah stok item pada sistem akan **bertambah secara otomatis (Auto-increment)**.</p>
+    </div>
+
+    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+      <h2 class="text-sm font-bold text-sky-400">3. Input Transaksi Barang Keluar</h2>
+      <p class="text-slate-300">Pilih barang dan masukkan penerima (mekanik/no. truk). Sistem akan **mengurangi stok secara otomatis (Auto-decrement)**. Apabila jumlah pengeluaran melebihi sisa stok, transaksi akan ditolak (**Proteksi Stok Minus**).</p>
+    </div>
+
+    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+      <h2 class="text-sm font-bold text-sky-400">4. Stock Opname (Penyesuaian Stok)</h2>
+      <p class="text-slate-300">Lakukan penyesuaian jumlah persediaan apabila terdapat selisih fisik vs sistem akibat barang rusak atau hilang. Sistem akan mencatat riwayat penyesuaian pada audit log.</p>
+    </div>
+  </section>
+</body>
+</html>

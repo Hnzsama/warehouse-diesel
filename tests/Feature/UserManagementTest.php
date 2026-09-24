@@ -47,3 +47,38 @@ test('admin cannot delete own account', function () {
         'id' => $admin->id,
     ]);
 });
+
+test('pemilik can view user management page and create new user', function () {
+    $pemilik = User::factory()->create();
+    $pemilik->assignRole('pemilik');
+
+    $response = $this->actingAs($pemilik)->withoutVite()->get('/users');
+    $response->assertOk();
+
+    $response = $this->actingAs($pemilik)->withoutVite()->post('/users', [
+        'name' => 'Staf Gudang Baru',
+        'email' => 'stafbaru@gudangdiesel.com',
+        'password' => 'password123',
+        'role' => 'admin',
+    ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('users', [
+        'email' => 'stafbaru@gudangdiesel.com',
+    ]);
+});
+
+test('pemilik can delete another user account', function () {
+    $pemilik = User::factory()->create();
+    $pemilik->assignRole('pemilik');
+
+    $targetUser = User::factory()->create();
+    $targetUser->assignRole('admin');
+
+    $response = $this->actingAs($pemilik)->withoutVite()->delete("/users/{$targetUser->id}");
+
+    $response->assertRedirect();
+    $this->assertDatabaseMissing('users', [
+        'id' => $targetUser->id,
+    ]);
+});

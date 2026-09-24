@@ -75,7 +75,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
         Route::put('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
         Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
+    });
 
+    // Pengelolaan Akun Pengguna / User (Admin Gudang & Pemilik)
+    Route::middleware(['role:admin|pemilik'])->group(function () {
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
