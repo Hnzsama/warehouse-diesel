@@ -4,44 +4,236 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panduan Operasional — Admin Gudang</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: "#f0f9ff",
+              100: "#e0f2fe",
+              500: "#0284c7",
+              600: "#0369a1",
+              700: "#075985",
+              900: "#0c4a6e"
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Marked.js & Mermaid.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>body { font-family: "Inter", sans-serif; }</style>
+  
+  <style>
+    body { font-family: "Inter", sans-serif; }
+    
+    .prose h1 { font-size: 1.75rem; font-weight: 700; color: inherit; margin-top: 1.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(148,163,184,0.2); padding-bottom: 0.5rem; }
+    .prose h2 { font-size: 1.35rem; font-weight: 600; color: inherit; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(148,163,184,0.15); padding-bottom: 0.25rem; }
+    .prose h3 { font-size: 1.15rem; font-weight: 600; color: inherit; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    .prose p { color: inherit; line-height: 1.7; margin-top: 0.75rem; margin-bottom: 0.75rem; font-size: 0.95rem; opacity: 0.9; }
+    .prose ul { list-style-type: disc; list-style-position: inside; margin-top: 0.75rem; margin-bottom: 0.75rem; padding-left: 0.5rem; opacity: 0.9; }
+    .prose ol { list-style-type: decimal; list-style-position: inside; margin-top: 0.75rem; margin-bottom: 0.75rem; padding-left: 0.5rem; opacity: 0.9; }
+    .prose code { font-family: monospace; font-size: 0.875rem; background-color: rgba(2,132,199,0.15); color: #38bdf8; padding: 0.15rem 0.4rem; border-radius: 0.25rem; }
+    .prose pre { background-color: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 0.75rem; overflow-x: auto; margin-top: 1rem; margin-bottom: 1rem; font-size: 0.875rem; font-family: monospace; }
+    .prose blockquote { border-left: 4px solid #0284c7; background-color: rgba(2,132,199,0.08); padding: 0.75rem 1rem; margin-top: 1rem; margin-bottom: 1rem; border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; font-style: italic; }
+    .prose table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; margin-bottom: 1.5rem; font-size: 0.875rem; text-align: left; }
+    .prose th { background-color: rgba(148,163,184,0.15); font-weight: 600; padding: 0.75rem; border: 1px solid rgba(148,163,184,0.25); }
+    .prose td { padding: 0.75rem; border: 1px solid rgba(148,163,184,0.2); }
+
+    .mermaid-wrapper {
+      background: #0f172a;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin: 1.75rem 0;
+      border: 1px solid rgba(148,163,184,0.12);
+      display: block;
+      overflow-x: auto;
+    }
+    .mermaid-wrapper .mermaid { display: flex; justify-content: center; }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 p-6 max-w-4xl mx-auto space-y-6">
-  <header class="border-b border-slate-800 pb-4 flex items-center justify-between">
-    <div>
-      <h1 class="text-2xl font-bold text-white flex items-center gap-2">
-        <i class="fa-solid fa-boxes-packing text-sky-400"></i> Panduan Operasional — Admin Gudang
-      </h1>
-      <p class="text-xs text-slate-400 mt-1">Sistem Informasi Manajemen Stok Barang Gudang Diesel Truk Medan</p>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+  <!-- Header Top Bar -->
+  <header class="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-sky-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 font-bold text-lg">
+        🛠️
+      </div>
+      <div>
+        <h1 class="font-bold text-white text-base leading-tight">Panduan Operasional — Admin Gudang</h1>
+        <p class="text-xs text-slate-400">Gudang Diesel Truk Medan</p>
+      </div>
     </div>
-    <a href="index.html" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white">
-      <i class="fa-solid fa-arrow-left"></i> Kembali ke Docs
-    </a>
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-colors flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Kembali ke Documentation Hub
+      </a>
+    </div>
   </header>
 
-  <section class="space-y-4 text-xs">
-    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-      <h2 class="text-sm font-bold text-sky-400">1. Pengelolaan Master Data Sparepart</h2>
-      <p class="text-slate-300">Admin memiliki akses penuh untuk menambah, mengedit, dan menghapus master data suku cadang (kode barang, nama barang, lokasi rak, stok awal, dan stok minimum).</p>
-    </div>
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-10">
+    <article id="markdown-container" class="prose max-w-none">
+      <!-- Content populated by JS -->
+    </article>
+  </main>
 
-    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-      <h2 class="text-sm font-bold text-sky-400">2. Input Transaksi Barang Masuk</h2>
-      <p class="text-slate-300">Pilih supplier dan item barang yang diterima. Setelah disimpan, jumlah stok item pada sistem akan **bertambah secara otomatis (Auto-increment)**.</p>
-    </div>
+  <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+    <p>© 2026 Gudang Diesel Truk Medan — Panduan Operasional Admin Gudang</p>
+  </footer>
 
-    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-      <h2 class="text-sm font-bold text-sky-400">3. Input Transaksi Barang Keluar</h2>
-      <p class="text-slate-300">Pilih barang dan masukkan penerima (mekanik/no. truk). Sistem akan **mengurangi stok secara otomatis (Auto-decrement)**. Apabila jumlah pengeluaran melebihi sisa stok, transaksi akan ditolak (**Proteksi Stok Minus**).</p>
-    </div>
+  <script>
+    const markdownContent = `# Panduan Operasional Lengkap — Admin Gudang
 
-    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-      <h2 class="text-sm font-bold text-sky-400">4. Stock Opname (Penyesuaian Stok)</h2>
-      <p class="text-slate-300">Lakukan penyesuaian jumlah persediaan apabila terdapat selisih fisik vs sistem akibat barang rusak atau hilang. Sistem akan mencatat riwayat penyesuaian pada audit log.</p>
-    </div>
-  </section>
+> **Sistem Informasi Manajemen Stok Barang Gudang Diesel Truk Medan**  
+> **Aktor:** Admin Gudang (Operational Access)  
+> **Hak Akses:** Full Operasional (Master Data, Mutasi Barang Masuk/Keluar, Stock Opname, Monitoring, Laporan)
+
+---
+
+## 1. Pendahuluan & Alur Kerja Utama
+
+Sebagai **Admin Gudang**, Anda bertanggung jawab secara penuh terhadap operasional fisik dan pencatatan persediaan suku cadang (sparepart) di Gudang Diesel Truk Medan. Sistem ini dirancang untuk memastikan pencatatan stok berjalan secara otomatis (*Auto-increment* & *Auto-decrement*), konsisten, serta bebas dari kesalahan selisih stok fisik vs buku.
+
+\`\`\`mermaid
+flowchart TD
+    A["Login Admin Gudang"] --> B["Dashboard Monitoring & Alert"]
+    B --> C1["Pengelolaan Master Data"]
+    B --> C2["Input Barang Masuk (Restock)"]
+    B --> C3["Input Barang Keluar (Mekanik/Truk)"]
+    B --> C4["Stock Opname (Adjustment)"]
+    
+    C2 -->|"Auto-increment"| D["Stok Bertambah Automatically"]
+    C3 -->|"Validation Check: Out <= Stock"| E{"Stok Cukup?"}
+    E -->|"Ya"| F["Auto-decrement: Stok Berkurang"]
+    E -->|"Tidak"| G["Ditolak: Alert Proteksi Stok Minus"]
+    
+    C4 --> H["Sync Stok Fisik & Sistem"]
+\`\`\`
+
+---
+
+## 2. Modul Master Data Sparepart & Referensi
+
+### 2.1 Menambah Master Data Sparepart Baru
+1. Buka menu **Master Data** ➔ **Sparepart** (\`/items\`).
+2. Klik tombol **+ Tambah Sparepart**.
+3. Isi formulir dengan data yang akurat:
+   - **Kode Barang (Unik):** Contoh \`SPR-001\` (Filter Oli), \`FLT-002\` (Filter Solar).
+   - **Nama Sparepart:** Nama lengkap suku cadang mesin diesel truk.
+   - **Kategori:** Pilih kategori (cth: *Filter*, *Mesin*, *Oli & Pelumas*).
+   - **Satuan Unit:** Pilih satuan (cth: *Pcs*, *Set*, *Unit*, *Dus*).
+   - **Lokasi Rak:** Rak penyimpanan di gudang fisik (cth: *Rak A-02*).
+   - **Stok Awal:** Jumlah persediaan awal saat pendataan.
+   - **Stok Minimum (\`min_stock\`):** Ambang batas aman persediaan (cth: \`5\`). Apabila sisa stok <= stok minimum, sistem akan menampilkan peringatan visual kuning/merah di Dashboard.
+4. Klik **Simpan**.
+
+### 2.2 Mengelola Kategori, Satuan Unit & Supplier
+- **Kategori (\`/categories\`):** Tambah/edit jenis sparepart untuk mempermudah pemfilteran.
+- **Satuan Unit (\`/units\`):** Pendataan satuan barang baku yang digunakan gudang.
+- **Supplier (\`/suppliers\`):** Pendataan distributor penyedia sparepart lengkap dengan nama, nomor telepon, dan alamat kantor.
+
+---
+
+## 3. Transaksi Barang Masuk (Restock Supplier)
+
+### 3.1 Alur Input Barang Masuk
+1. Buka menu **Transaksi** ➔ **Barang Masuk** (\`/incoming-items\`).
+2. Klik tombol **+ Input Barang Masuk**.
+3. Lengkapi formulir transaksi:
+   - **Tanggal Penerimaan:** Tanggal barang tiba di gudang.
+   - **Pilih Sparepart:** Cari nama atau kode barang yang diterima.
+   - **Pilih Supplier:** Distributor pengirim barang.
+   - **Jumlah Diterima:** Ketik jumlah unit yang diterima (wajib angka positif).
+   - **Nomor Faktur / Surat Jalan:** Masukkan nomor bukti faktur dari supplier.
+   - **Upload Bukti Invoice (Opsional):** Lampirkan foto/scan surat jalan.
+4. Klik **Simpan Transaksi**.
+5. **Efek Sistem:** Sistem secara otomatis mengeksekusi *Auto-increment*:
+   Stok Baru = Stok Lama + Jumlah Barang Masuk
+
+---
+
+## 4. Transaksi Barang Keluar & Proteksi Stok Minus
+
+### 4.1 Alur Input Barang Keluar
+1. Buka menu **Transaksi** ➔ **Barang Keluar** (\`/outgoing-items\`).
+2. Klik tombol **+ Input Barang Keluar**.
+3. Lengkapi formulir transaksi:
+   - **Tanggal Pengeluaran:** Tanggal barang dikeluarkan dari gudang.
+   - **Pilih Sparepart:** Pilih nama barang yang diambil mekanik.
+   - **Jumlah Keluar:** Ketik jumlah unit yang dikeluarkan.
+   - **Penerima:** Nama mekanik atau Nomor Plat Truk peruntukan.
+   - **Catatan / Keterangan:** Alasan perbaikan/peruntukan barang.
+4. Klik **Simpan Transaksi**.
+
+### 4.2 Aturan Proteksi Stok Minus
+Sistem memvalidasi jumlah pengeluaran secara real-time:
+- **Jika Jumlah Keluar <= Sisa Stok:** Transaksi berhasil disimpan, dan stok berkurang secara *Auto-decrement*:
+  Stok Baru = Stok Lama - Jumlah Barang Keluar
+- **Jika Jumlah Keluar > Sisa Stok:** Sistem menolak transaksi dan menampilkan pesan kesalahan:
+  > ❌ **Gagal:** Jumlah pengeluaran melebihi sisa stok yang tersedia di gudang!
+
+---
+
+## 5. Stock Opname / Penyesuaian Stok (Adjustment)
+
+Fitur ini digunakan jika terjadi perbedaan jumlah antara catatan di sistem dengan fisik riil di gudang akibat barang rusak atau hilang saat penyimpanan.
+
+### 5.1 Alur Pelaksanaan Stock Opname
+1. Buka menu **Stock Opname** (\`/stock-adjustments\`).
+2. Klik tombol **+ Input Stock Opname**.
+3. Pilih nama sparepart yang akan disesuaikan.
+4. Masukkan **Jumlah Stok Fisik Riil** hasil pengecekan di rak gudang.
+5. Sistem me-hitung selisih secara otomatis:
+   Selisih = Stok Fisik - Stok Sistem
+6. Masukkan **Alasan Penyesuaian** (cth: *2 unit rusak terkena oli*, *1 unit hilang saat pecah dus*).
+7. Klik **Simpan Adjustment**.
+8. **Efek Sistem:** Stok sistem akan disinkronkan 100% mengikuti jumlah fisik riil dan tercatat pada *Audit Trail Log*.
+
+---
+
+## 6. Laporan Persediaan & Cetak PDF / Excel
+
+1. Buka menu **Laporan** (\`/reports\`).
+2. Tentukan **Rentang Tanggal** (Awal s/d Akhir) dan Filter Kategori jika diperlukan.
+3. Pilih Format Output:
+   - 🖨️ **Cetak (Print):** Buka tampilan layout cetak bersih untuk printer.
+   - 📄 **Download PDF:** Mengunduh berkas laporan format PDF (DomPDF).
+   - 📊 **Download Excel:** Mengunduh berkas spreadsheet (PhpSpreadsheet).`;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById("markdown-container");
+      container.innerHTML = marked.parse(markdownContent);
+
+      container.querySelectorAll('pre code.language-mermaid, pre code.lang-mermaid').forEach((block) => {
+        const pre = block.parentElement;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mermaid-wrapper';
+        const innerDiv = document.createElement('div');
+        innerDiv.className = 'mermaid';
+        innerDiv.textContent = block.textContent;
+        wrapper.appendChild(innerDiv);
+        pre.replaceWith(wrapper);
+      });
+
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        securityLevel: 'loose',
+        fontFamily: 'Inter, sans-serif'
+      });
+    });
+  </script>
 </body>
 </html>
